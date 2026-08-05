@@ -1,0 +1,1010 @@
+// ============================================================
+// AK TİCARET YAPI MALZEMELERİ — Prisma Şeması
+// B2B + B2C e-ticaret + BİZİM HESAP (ERP) entegrasyonu
+// PostgreSQL. Para alanları Decimal(12,2), oran alanları Decimal(5,2).
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// RBAC / KULLANICI
+// ============================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+  B2B_CUSTOMER
+  B2C_CUSTOMER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  phone         String?
+  role          UserRole  @default(B2C_CUSTOMER)
+  isActive      Boolean   @default(true)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions       Session[]
+  permissions    UserPermission[]
+  addresses      Address[]
+  b2bCustomer    B2BCustomer?
+  account        Account?
+  cart           Cart?
+  orders         Order[]
+  quotes         Quote[]
+  favorites      Favorite[]
+  reviews        Review[]
+  questions      ProductQuestion[]
+  notifications  Notification[]
+  supportTickets SupportTicket[]
+  auditLogs      AuditLog[]
+  blogPosts      BlogPost[]
+
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Yetki kataloğu. Rol -> varsayılan yetkiler kod tarafında (lib/rbac.ts);
+/// bu tablo kullanıcı bazlı EK yetki (override) için kullanılır.
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique // ör. "products.write"
+  group       String // ör. "Ürünler"
+  description String?
+  users       UserPermission[]
+}
+
+model UserPermission {
+  userId       String
+  permissionId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+}
+
+model Address {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         AddressType @default(SHIPPING)
+  title        String // "Ev", "İş yeri"
+  fullName     String
+  phone        String
+  city         String
+  district     String
+  neighborhood String?
+  addressLine  String
+  zip          String?
+  isDefault    Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+
+  @@index([userId])
+}
+
+// ============================================================
+// B2B / BAYİ
+// ============================================================
+
+/// Müşteri grupları: Standart / Silver / Gold / Platinum
+model CustomerGroup {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  discountPercent Decimal  @default(0) @db.Decimal(5, 2)
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  b2bCustomers B2BCustomer[]
+  prices       CustomerPrice[]
+}
+
+enum B2BStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum CompanyType {
+  SAHIS // Şahıs
+  LIMITED
+  ANONIM
+  DIGER
+}
+
+/// Bayi başvurusu + onaylı bayi kaydı (firma bilgileri burada tutulur)
+model B2BCustomer {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName       String
+  contactName       String
+  phone             String
+  email             String
+  taxOffice         String?
+  taxNumber         String?
+  companyType       CompanyType    @default(SAHIS)
+  city              String?
+  district          String?
+  address           String?
+  taxCertificateUrl String?
+  status            B2BStatus      @default(PENDING)
+  customerGroupId   String?
+  customerGroup     CustomerGroup? @relation(fields: [customerGroupId], references: [id])
+  approvedAt        DateTime?
+  approvedById      String?
+  notes             String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([status])
+}
+
+// ============================================================
+// KATALOG: MARKA / KATEGORİ / ÜRÜN
+// ============================================================
+
+model Brand {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  logoUrl        String?
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  products Product[]
+}
+
+model Category {
+  id             String     @id @default(cuid())
+  name           String
+  slug           String     @unique
+  parentId       String?
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children       Category[] @relation("CategoryTree")
+  description    String?
+  imageUrl       String?
+  bannerUrl      String?
+  icon           String? // lucide ikon adı
+  seoTitle       String?
+  seoDescription String?
+  sortOrder      Int        @default(0)
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+
+  products Product[]
+  mapping  BizimHesapCategoryMapping?
+
+  @@index([parentId])
+}
+
+/// Ürün verisinin kaynağı: MANUAL (web sitesi) veya BIZIMHESAP (ERP master)
+enum ProductSource {
+  MANUAL
+  BIZIMHESAP
+}
+
+model Product {
+  id         String    @id @default(cuid())
+  name       String
+  slug       String    @unique
+  sku        String?   @unique
+  barcode    String?
+  brandId    String?
+  brand      Brand?    @relation(fields: [brandId], references: [id])
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  shortDescription String?
+  description      String?
+  technicalSpecs   Json? // serbest teknik özellik tablosu
+  videoUrl         String?
+
+  // Fiyatlar (BİZİM HESAP'tan gelen ticari alanlar + web özel)
+  purchasePrice Decimal? @db.Decimal(12, 2) // alış
+  listPrice     Decimal  @db.Decimal(12, 2) // liste
+  b2cPrice      Decimal  @db.Decimal(12, 2) // B2C satış
+  b2bPrice      Decimal? @db.Decimal(12, 2) // genel B2B
+  vatRate       Int      @default(20)
+
+  // Stok (kaynak: BİZİM HESAP; web cache)
+  stock    Int      @default(0)
+  minOrder Int      @default(1)
+  maxOrder Int?
+  unit     String   @default("adet")
+  weight   Decimal? @db.Decimal(10, 3) // kg
+  desi     Decimal? @db.Decimal(10, 2)
+  warranty String?
+
+  isActive   Boolean @default(true)
+  isFeatured Boolean @default(false)
+  viewCount  Int     @default(0)
+
+  seoTitle       String?
+  seoDescription String?
+
+  source ProductSource @default(MANUAL)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images          ProductImage[]
+  variants        ProductVariant[]
+  attributeValues ProductAttributeValue[]
+  favorites       Favorite[]
+  reviews         Review[]
+  questions       ProductQuestion[]
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
+  quoteItems      QuoteItem[]
+  customerPrices  CustomerPrice[]
+  stockMovements  StockMovement[]
+  mapping         BizimHesapProductMapping?
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isActive, isFeatured])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  @@index([productId])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String // ör. "40mm", "Kırmızı"
+  sku       String?
+  barcode   String?
+  priceDiff Decimal @default(0) @db.Decimal(12, 2)
+  stock     Int     @default(0)
+  isActive  Boolean @default(true)
+
+  cartItems CartItem[]
+
+  @@index([productId])
+}
+
+model ProductAttribute {
+  id     String                  @id @default(cuid())
+  name   String
+  slug   String                  @unique
+  unit   String?
+  values ProductAttributeValue[]
+}
+
+model ProductAttributeValue {
+  id          String           @id @default(cuid())
+  productId   String
+  product     Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributeId String
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  value       String
+
+  @@unique([productId, attributeId])
+  @@index([attributeId])
+}
+
+// ============================================================
+// B2B FİYATLANDIRMA
+// Öncelik: özel müşteri fiyatı > grup fiyatı > grup indirimi > B2B fiyatı > B2C
+// ============================================================
+
+model PriceList {
+  id        String   @id @default(cuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+/// Özel fiyat: belirli bir kullanıcıya (userId) VEYA bir gruba (customerGroupId) özel.
+model CustomerPrice {
+  id              String         @id @default(cuid())
+  productId       String
+  product         Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId          String?
+  customerGroupId String?
+  customerGroup   CustomerGroup? @relation(fields: [customerGroupId], references: [id], onDelete: Cascade)
+  price           Decimal        @db.Decimal(12, 2)
+  minQty          Int            @default(1)
+  createdAt       DateTime       @default(now())
+
+  @@index([productId])
+  @@index([userId])
+  @@index([customerGroupId])
+}
+
+// ============================================================
+// CARİ HESAP (abstraction — veri kaynağı BİZİM HESAP olabilir)
+// ============================================================
+
+enum AccountSource {
+  LOCAL
+  BIZIMHESAP
+}
+
+model Account {
+  id                   String               @id @default(cuid())
+  userId               String               @unique
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance              Decimal              @default(0) @db.Decimal(14, 2)
+  creditLimit          Decimal?             @db.Decimal(14, 2)
+  currency             String               @default("TRY")
+  source               AccountSource        @default(LOCAL)
+  bizimHesapCustomerId String?
+  updatedAt            DateTime             @updatedAt
+  transactions         AccountTransaction[]
+}
+
+enum AccountTxnType {
+  DEBIT // borç
+  CREDIT // alacak / ödeme
+}
+
+model AccountTransaction {
+  id          String         @id @default(cuid())
+  accountId   String
+  account     Account        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  type        AccountTxnType
+  amount      Decimal        @db.Decimal(14, 2)
+  description String?
+  refType     String? // "ORDER" | "PAYMENT" | "INVOICE"
+  refId       String?
+  createdAt   DateTime       @default(now())
+
+  @@index([accountId])
+}
+
+// ============================================================
+// SEPET
+// ============================================================
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String?    @unique
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?    @unique // misafir sepeti
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String          @id @default(cuid())
+  cartId    String
+  cart      Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  quantity  Int             @default(1)
+  unitPrice Decimal         @db.Decimal(12, 2) // ekleme anındaki fiyat (checkout'ta sunucuda doğrulanır)
+
+  @@index([cartId])
+}
+
+// ============================================================
+// SİPARİŞ / ÖDEME / KARGO
+// ============================================================
+
+enum CustomerType {
+  B2C
+  B2B
+}
+
+enum OrderStatus {
+  NEW // Yeni
+  AWAITING_PAYMENT // Ödeme Bekliyor
+  PAID // Ödeme Alındı
+  PREPARING // Hazırlanıyor
+  SHIPPED // Kargoya Verildi
+  DELIVERED // Teslim Edildi
+  CANCELLED // İptal
+  REFUNDED // İade
+}
+
+enum PaymentMethod {
+  CARD // Kredi kartı
+  BANK_TRANSFER // Havale/EFT
+  ACCOUNT // Cari hesap (vadeli)
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+/// BİZİM HESAP'a aktarım durumu
+enum BizimHesapSyncStatus {
+  NOT_SYNCED
+  PENDING
+  SYNCED
+  FAILED
+}
+
+model Order {
+  id           String       @id @default(cuid())
+  orderNumber  String       @unique
+  userId       String?
+  user         User?        @relation(fields: [userId], references: [id])
+  customerType CustomerType @default(B2C)
+  status       OrderStatus  @default(NEW)
+
+  // Tutarlar
+  subtotal      Decimal @db.Decimal(12, 2)
+  discountTotal Decimal @default(0) @db.Decimal(12, 2)
+  vatTotal      Decimal @default(0) @db.Decimal(12, 2)
+  shippingTotal Decimal @default(0) @db.Decimal(12, 2)
+  grandTotal    Decimal @db.Decimal(12, 2)
+
+  couponId   String?
+  couponCode String?
+  note       String?
+
+  // Fatura / teslimat anlık kopyası
+  billingName      String?
+  billingPhone     String?
+  billingCity      String?
+  billingDistrict  String?
+  billingAddress   String?
+  shippingName     String?
+  shippingPhone    String?
+  shippingCity     String?
+  shippingDistrict String?
+  shippingAddress  String?
+
+  paymentMethod PaymentMethod @default(CARD)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  bizimHesapOrderId  String?
+  bizimHesapSync     BizimHesapSyncStatus @default(NOT_SYNCED)
+  bizimHesapSyncedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items     OrderItem[]
+  payments  Payment[]
+  shipments Shipment[]
+  coupon    Coupon?     @relation(fields: [couponId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  productName String // anlık kopya
+  sku         String?
+  variantName String?
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  quantity    Int
+  vatRate     Int      @default(20)
+  discount    Decimal  @default(0) @db.Decimal(12, 2)
+  lineTotal   Decimal  @db.Decimal(12, 2)
+
+  @@index([orderId])
+}
+
+model Payment {
+  id           String               @id @default(cuid())
+  orderId      String
+  order        Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider     String               @default("none") // iyzico | paytr | none
+  method       PaymentMethod        @default(CARD)
+  amount       Decimal              @db.Decimal(12, 2)
+  status       PaymentStatus        @default(PENDING)
+  providerRef  String?
+  createdAt    DateTime             @default(now())
+  transactions PaymentTransaction[]
+
+  @@index([orderId])
+}
+
+/// Webhook / sağlayıcı geri dönüş kayıtları
+model PaymentTransaction {
+  id          String        @id @default(cuid())
+  paymentId   String
+  payment     Payment       @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  status      PaymentStatus
+  providerRef String?
+  rawPayload  Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([paymentId])
+}
+
+enum ShipmentStatus {
+  PREPARING
+  SHIPPED
+  DELIVERED
+  RETURNED
+}
+
+model Shipment {
+  id             String         @id @default(cuid())
+  orderId        String
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  carrier        String?
+  trackingNumber String?
+  trackingUrl    String?
+  status         ShipmentStatus @default(PREPARING)
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime       @default(now())
+
+  @@index([orderId])
+}
+
+// ============================================================
+// TEKLİF (B2B)
+// ============================================================
+
+enum QuoteStatus {
+  REQUESTED // Talep edildi
+  PREPARING // Hazırlanıyor
+  SENT // Gönderildi
+  ACCEPTED // Kabul
+  REJECTED // Red
+  EXPIRED // Süresi doldu
+  CONVERTED // Siparişe dönüştü
+}
+
+model Quote {
+  id            String      @id @default(cuid())
+  quoteNumber   String      @unique
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        QuoteStatus @default(REQUESTED)
+  note          String?
+  subtotal      Decimal?    @db.Decimal(12, 2)
+  discountTotal Decimal?    @db.Decimal(12, 2)
+  grandTotal    Decimal?    @db.Decimal(12, 2)
+  validUntil    DateTime?
+  orderId       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         QuoteItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model QuoteItem {
+  id             String   @id @default(cuid())
+  quoteId        String
+  quote          Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id])
+  productName    String
+  quantity       Int      @default(1)
+  requestedPrice Decimal? @db.Decimal(12, 2)
+  offeredPrice   Decimal? @db.Decimal(12, 2)
+  note           String?
+
+  @@index([quoteId])
+}
+
+// ============================================================
+// KUPON / KAMPANYA
+// ============================================================
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+enum Audience {
+  ALL
+  B2B
+  B2C
+}
+
+model Coupon {
+  id           String     @id @default(cuid())
+  code         String     @unique
+  type         CouponType @default(PERCENT)
+  value        Decimal    @db.Decimal(12, 2)
+  minCartTotal Decimal?   @db.Decimal(12, 2)
+  maxDiscount  Decimal?   @db.Decimal(12, 2)
+  usageLimit   Int?
+  usedCount    Int        @default(0)
+  perUserLimit Int?
+  audience     Audience   @default(ALL)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  orders       Order[]
+}
+
+enum CampaignType {
+  FREE_SHIPPING // Ör: 1000 TL üzeri kargo bedava
+  CATEGORY_PERCENT // Kategoride %X
+  BRAND_PERCENT // Markada %X (ör. Bosch %10)
+  GROUP_EXTRA // Gruba ekstra indirim (ör. Gold %5)
+  BUY_X_GET_Y // 2 al %10
+}
+
+model Campaign {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  type        CampaignType
+  config      Json // türe göre parametreler (eşik, yüzde, kategori/marka id vb.)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  isActive    Boolean      @default(true)
+  priority    Int          @default(0)
+  createdAt   DateTime     @default(now())
+}
+
+// ============================================================
+// FAVORİ / YORUM / SORU-CEVAP
+// ============================================================
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  authorName String
+  rating     Int // 1-5
+  title      String?
+  comment    String
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([productId])
+}
+
+model ProductQuestion {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  authorName String
+  question   String
+  answer     String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([productId])
+}
+
+// ============================================================
+// TEDARİKÇİ / STOK HAREKETİ
+// ============================================================
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+enum StockMovementType {
+  IN // giriş
+  OUT // çıkış
+  ADJUST // düzeltme
+  SYNC // BİZİM HESAP senkron
+  ORDER // sipariş kaynaklı
+}
+
+enum StockSource {
+  MANUAL
+  ORDER
+  BIZIMHESAP
+}
+
+model StockMovement {
+  id          String            @id @default(cuid())
+  productId   String
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type        StockMovementType
+  quantity    Int
+  reason      String?
+  refType     String?
+  refId       String?
+  source      StockSource       @default(MANUAL)
+  createdById String?
+  createdAt   DateTime          @default(now())
+
+  @@index([productId])
+}
+
+// ============================================================
+// BİZİM HESAP EŞLEŞTİRME (MAPPING) + SENKRONİZASYON
+// ============================================================
+
+enum MappingSyncStatus {
+  PENDING
+  SYNCED
+  FAILED
+}
+
+model BizimHesapProductMapping {
+  id                  String            @id @default(cuid())
+  websiteProductId    String            @unique
+  product             Product           @relation(fields: [websiteProductId], references: [id], onDelete: Cascade)
+  bizimHesapProductId String
+  lastSyncedAt        DateTime?
+  syncStatus          MappingSyncStatus @default(PENDING)
+  syncError           String?
+
+  @@index([bizimHesapProductId])
+}
+
+model BizimHesapCategoryMapping {
+  id                   String            @id @default(cuid())
+  websiteCategoryId    String            @unique
+  category             Category          @relation(fields: [websiteCategoryId], references: [id], onDelete: Cascade)
+  bizimHesapCategoryId String
+  lastSyncedAt         DateTime?
+  syncStatus           MappingSyncStatus @default(PENDING)
+
+  @@index([bizimHesapCategoryId])
+}
+
+model BizimHesapCustomerMapping {
+  id                   String    @id @default(cuid())
+  websiteUserId        String    @unique
+  bizimHesapCustomerId String
+  lastSyncedAt         DateTime?
+
+  @@index([bizimHesapCustomerId])
+}
+
+enum SyncType {
+  PRODUCTS
+  CATEGORIES
+  STOCK
+  PRICES
+  ORDERS
+  CUSTOMERS
+  FULL
+}
+
+enum SyncStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  PARTIAL
+}
+
+enum SyncTrigger {
+  MANUAL
+  CRON
+}
+
+model SyncJob {
+  id          String      @id @default(cuid())
+  type        SyncType
+  status      SyncStatus  @default(PENDING)
+  triggeredBy SyncTrigger @default(MANUAL)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  totalRead   Int         @default(0)
+  created     Int         @default(0)
+  updated     Int         @default(0)
+  failed      Int         @default(0)
+  createdAt   DateTime    @default(now())
+  logs        SyncLog[]
+  errors      SyncError[]
+
+  @@index([type])
+  @@index([status])
+}
+
+enum SyncLogLevel {
+  INFO
+  WARN
+  ERROR
+}
+
+model SyncLog {
+  id        String       @id @default(cuid())
+  jobId     String
+  job       SyncJob      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  level     SyncLogLevel @default(INFO)
+  message   String
+  createdAt DateTime     @default(now())
+
+  @@index([jobId])
+}
+
+model SyncError {
+  id         String   @id @default(cuid())
+  jobId      String?
+  job        SyncJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  entityType String // "PRODUCT" | "CATEGORY" | ...
+  entityRef  String?
+  message    String
+  payload    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([jobId])
+}
+
+// ============================================================
+// CMS / DİĞER
+// ============================================================
+
+enum BannerPosition {
+  HERO
+  PROMO
+  CATEGORY
+}
+
+model Banner {
+  id             String         @id @default(cuid())
+  title          String?
+  subtitle       String?
+  imageUrl       String
+  mobileImageUrl String?
+  linkUrl        String?
+  ctaLabel       String?
+  position       BannerPosition @default(HERO)
+  sortOrder      Int            @default(0)
+  isActive       Boolean        @default(true)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  createdAt      DateTime       @default(now())
+
+  @@index([position, isActive])
+}
+
+model BlogPost {
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  excerpt        String?
+  content        String
+  coverUrl       String?
+  tags           String[]  @default([])
+  category       String?
+  seoTitle       String?
+  seoDescription String?
+  isPublished    Boolean   @default(false)
+  publishedAt    DateTime?
+  authorId       String?
+  author         User?     @relation(fields: [authorId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  type      String? // "ORDER" | "SYSTEM" | "B2B"
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING
+  CLOSED
+}
+
+model SupportTicket {
+  id        String       @id @default(cuid())
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id])
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  status    TicketStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  actorName  String?
+  action     String // "product.price.update"
+  entityType String?
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+}
+
+/// Tekil ayar satırı (id = "main") + esnek JSON.
+model SiteSetting {
+  id                String   @id @default("main")
+  companyName       String   @default("AK TİCARET YAPI MALZEMELERİ")
+  phone             String   @default("0538 583 27 04")
+  whatsapp          String   @default("905385832704")
+  email             String?
+  address           String?
+  instagram         String?
+  freeShipThreshold Decimal? @db.Decimal(12, 2)
+  data              Json? // ör. çalışma saatleri, sosyal linkler
+  updatedAt         DateTime @updatedAt
+}
