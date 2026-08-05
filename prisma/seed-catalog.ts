@@ -126,6 +126,14 @@ const PRODUCTS: P[] = [
 async function main() {
   console.log("🌱 Gerçek kategori yapısı + demo katalog seed...");
 
+  // Deploy güvenliği: kategori zaten varsa TEKRAR seed etme (veriyi koru).
+  // Zorla yeniden seed için: FORCE_RESEED=1
+  const existingCats = await db.category.count();
+  if (existingCats > 0 && process.env.FORCE_RESEED !== "1") {
+    console.log(`⏭ ${existingCats} kategori zaten mevcut — katalog seed atlandı.`);
+    return;
+  }
+
   // Katalog temizliği (kullanıcı/ayar/yetki KORUNUR)
   await db.productImage.deleteMany();
   await db.bizimHesapProductMapping.deleteMany();
