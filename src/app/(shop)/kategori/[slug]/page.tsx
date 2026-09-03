@@ -8,6 +8,7 @@ import {
   getCategoryBySlug,
   getCategoryProducts,
   getCategoryBrands,
+  getDescendantIds,
   type SortKey,
 } from "@/lib/catalog";
 
@@ -47,7 +48,7 @@ export default async function CategoryPage({
   const cat = await getCategoryBySlug(slug);
   if (!cat) notFound();
 
-  const childIds = cat.children.map((c) => c.id);
+  const childIds = await getDescendantIds(cat.id);
   const allIds = [cat.id, ...childIds];
 
   const asStr = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);

@@ -1,0 +1,302 @@
+[
+ {
+  "id": "443",
+  "name": "Hırdavat ve Nalburiye Ekipmanları",
+  "slug": "hirdavat-ve-nalburiye-ekipmanlari-c443",
+  "parentId": null
+ },
+ {
+  "id": "464",
+  "name": "Ahşap & Metal Sap Çeşitleri",
+  "slug": "ahsap-metal-sap-cesitleri-c464",
+  "parentId": "443"
+ },
+ {
+  "id": "471",
+  "name": "Civata & Somun Grubu",
+  "slug": "civata-somun-grubu-c471",
+  "parentId": "443"
+ },
+ {
+  "id": "473",
+  "name": "İş Güvenlik Ekipmanları",
+  "slug": "is-guvenlik-ekipmanlari-c473",
+  "parentId": "443"
+ },
+ {
+  "id": "477",
+  "name": "Ayakkabı",
+  "slug": "ayakkabi-c477",
+  "parentId": "473"
+ },
+ {
+  "id": "478",
+  "name": "Çizme",
+  "slug": "cizme-c478",
+  "parentId": "473"
+ },
+ {
+  "id": "479",
+  "name": "Diğer",
+  "slug": "diger-c479",
+  "parentId": "473"
+ },
+ {
+  "id": "474",
+  "name": "Eldiven",
+  "slug": "eldiven-c474",
+  "parentId": "473"
+ },
+ {
+  "id": "475",
+  "name": "Halat",
+  "slug": "halat-c475",
+  "parentId": "473"
+ },
+ {
+  "id": "476",
+  "name": "Yağmurluk",
+  "slug": "yagmurluk-c476",
+  "parentId": "473"
+ },
+ {
+  "id": "465",
+  "name": "Kilit Çeşitleri",
+  "slug": "kilit-cesitleri-c465",
+  "parentId": "443"
+ },
+ {
+  "id": "468",
+  "name": "Multifonksiyonel Aletler ve Bıçaklar",
+  "slug": "multifonksiyonel-aletler-ve-bicaklar-c468",
+  "parentId": "443"
+ },
+ {
+  "id": "472",
+  "name": "Otomotiv Ekipmanları",
+  "slug": "otomotiv-ekipmanlari-c472",
+  "parentId": "443"
+ },
+ {
+  "id": "461",
+  "name": "Perde Rayı ve Ekipmanları",
+  "slug": "perde-rayi-ve-ekipmanlari-c461",
+  "parentId": "443"
+ },
+ {
+  "id": "463",
+  "name": "Temizlik Ekipmanları",
+  "slug": "temizlik-ekipmanlari-c463",
+  "parentId": "443"
+ },
+ {
+  "id": "470",
+  "name": "Dübel",
+  "slug": "dubel-c470",
+  "parentId": "443"
+ },
+ {
+  "id": "469",
+  "name": "Vida",
+  "slug": "vida-c469",
+  "parentId": "443"
+ },
+ {
+  "id": "467",
+  "name": "Bant Çeşitleri ve Ambalaj Ürünleri",
+  "slug": "bant-cesitleri-ve-ambalaj-urunleri-c467",
+  "parentId": "443"
+ },
+ {
+  "id": "466",
+  "name": "Çivi-Tel Ürünleri ve Ekipmanları",
+  "slug": "civi-tel-urunleri-ve-ekipmanlari-c466",
+  "parentId": "443"
+ },
+ {
+  "id": "462",
+  "name": "Merdiven & El Arabaları ve Ekipmanları",
+  "slug": "merdiven-el-arabalari-ve-ekipmanlari-c462",
+  "parentId": "443"
+ },
+ {
+  "id": "413",
+  "name": "Boya ve Boya Uygulama Ekipmanları",
+  "slug": "boya-ve-boya-uygulama-ekipmanlari-c413",
+  "parentId": null
+ },
+ {
+  "id": "437",
+  "name": "Ahşap Boyaları",
+  "slug": "ahsap-boyalari-c437",
+  "parentId": "413"
+ },
+ {
+  "id": "434",
+  "name": "Baz & Pigmentler & Pastalar",
+  "slug": "baz-pigmentler-pastalar-c434",
+  "parentId": "413"
+ },
+ {
+  "id": "418",
+  "name": "İnşaat Boyaları",
+  "slug": "insaat-boyalari-c418",
+  "parentId": "413"
+ },
+ {
+  "id": "484",
+  "name": "Dış Cephe Boyaları",
+  "slug": "dis-cephe-boyalari-c484",
+  "parentId": "418"
+ },
+ {
+  "id": "493",
+  "name": "İç & Dış Cephe Astarları",
+  "slug": "ic-dis-cephe-astarlari-c493",
+  "parentId": "418"
+ },
+ {
+  "id": "483",
+  "name": "İç Cephe Boyaları",
+  "slug": "ic-cephe-boyalari-c483",
+  "parentId": "418"
+ },
+ {
+  "id": "420",
+  "name": "Sanayi (Endüstriyel) Boyaları",
+  "slug": "sanayi-endustriyel-boyalari-c420",
+  "parentId": "413"
+ },
+ {
+  "id": "417",
+  "name": "Sentetik Yağlı Boyalar",
+  "slug": "sentetik-yagli-boyalar-c417",
+  "parentId": "413"
+ },
+ {
+  "id": "433",
+  "name": "Sprey Boyalar",
+  "slug": "sprey-boyalar-c433",
+  "parentId": "413"
+ },
+ {
+  "id": "419",
+  "name": "Tiner Grubu",
+  "slug": "tiner-grubu-c419",
+  "parentId": "413"
+ },
+ {
+  "id": "416",
+  "name": "Boya Uygulama Ekipmanları",
+  "slug": "boya-uygulama-ekipmanlari-c416",
+  "parentId": "413"
+ },
+ {
+  "id": "376",
+  "name": "Yapı Kimyasalları",
+  "slug": "yapi-kimyasallari-c376",
+  "parentId": null
+ },
+ {
+  "id": "414",
+  "name": "Elektrikli El Aletleri",
+  "slug": "elektrikli-el-aletleri-c414",
+  "parentId": null
+ },
+ {
+  "id": "425",
+  "name": "Matkap Uçları",
+  "slug": "matkap-uclari-c425",
+  "parentId": "414"
+ },
+ {
+  "id": "431",
+  "name": "Alçı ve Sıvacı El Aletleri",
+  "slug": "alci-ve-sivaci-el-aletleri-c431",
+  "parentId": "414"
+ },
+ {
+  "id": "430",
+  "name": "Aşındırıcı ve Kesiciler",
+  "slug": "asindirici-ve-kesiciler-c430",
+  "parentId": "414"
+ },
+ {
+  "id": "429",
+  "name": "Bits Uçlar",
+  "slug": "bits-uclar-c429",
+  "parentId": "414"
+ },
+ {
+  "id": "426",
+  "name": "El Aletleri ve Çeşitli Hırdavat Ürünleri",
+  "slug": "el-aletleri-ve-cesitli-hirdavat-urunleri-c426",
+  "parentId": "414"
+ },
+ {
+  "id": "428",
+  "name": "Elektrik & Aydınlatma Ekipmanları",
+  "slug": "elektrik-aydinlatma-ekipmanlari-c428",
+  "parentId": "414"
+ },
+ {
+  "id": "427",
+  "name": "Elektrikli & Akülü El Aletleri",
+  "slug": "elektrikli-akulu-el-aletleri-c427",
+  "parentId": "414"
+ },
+ {
+  "id": "438",
+  "name": "Ölçü Alet ve Ekipmanları",
+  "slug": "olcu-alet-ve-ekipmanlari-c438",
+  "parentId": "414"
+ },
+ {
+  "id": "415",
+  "name": "Alçıpan Profilleri ve Aksesuarları",
+  "slug": "alcipan-profilleri-ve-aksesuarlari-c415",
+  "parentId": null
+ },
+ {
+  "id": "423",
+  "name": "Alçıpan Profilleri ve Aksesuarları",
+  "slug": "alcipan-profilleri-ve-aksesuarlari-c423",
+  "parentId": "415"
+ },
+ {
+  "id": "424",
+  "name": "Fayans-Merdiven-Sıva Profilleri",
+  "slug": "fayans-merdiven-siva-profilleri-c424",
+  "parentId": "415"
+ },
+ {
+  "id": "401",
+  "name": "Tesisat Ürün ve Ekipmanları",
+  "slug": "tesisat-urun-ve-ekipmanlari-c401",
+  "parentId": null
+ },
+ {
+  "id": "480",
+  "name": "Isı - Su İzolasyon Ürünleri",
+  "slug": "isi-su-izolasyon-urunleri-c480",
+  "parentId": null
+ },
+ {
+  "id": "481",
+  "name": "Su İzolasyon Ürünleri",
+  "slug": "su-izolasyon-urunleri-c481",
+  "parentId": "480"
+ },
+ {
+  "id": "482",
+  "name": "Isı İzolasyon Ürünleri",
+  "slug": "isi-izolasyon-urunleri-c482",
+  "parentId": "480"
+ },
+ {
+  "id": "387",
+  "name": "Zirai ve Bahçe Ekipmanları",
+  "slug": "zirai-ve-bahce-ekipmanlari-c387",
+  "parentId": null
+ }
+]

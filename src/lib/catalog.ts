@@ -130,6 +130,28 @@ export async function getBrands(): Promise<{ id: string; name: string; slug: str
 
 export type SortKey = "new" | "price-asc" | "price-desc" | "popular";
 
+/** Bir kategorinin TÜM alt-soy id'leri (recursive) — ürün listelemede kullanılır. */
+export async function getDescendantIds(categoryId: string): Promise<string[]> {
+  const all = await db.category.findMany({ select: { id: true, parentId: true } });
+  const childrenMap = new Map<string, string[]>();
+  for (const c of all) {
+    if (c.parentId) {
+      if (!childrenMap.has(c.parentId)) childrenMap.set(c.parentId, []);
+      childrenMap.get(c.parentId)!.push(c.id);
+    }
+  }
+  const out: string[] = [];
+  const stack = [categoryId];
+  while (stack.length) {
+    const id = stack.pop()!;
+    for (const child of childrenMap.get(id) ?? []) {
+      out.push(child);
+      stack.push(child);
+    }
+  }
+  return out;
+}
+
 export async function getCategoryBySlug(slug: string) {
   return db.category.findUnique({
     where: { slug },
