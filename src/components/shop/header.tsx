@@ -3,6 +3,7 @@ import { User, Heart, ShoppingCart } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { SearchBar } from "@/components/shop/search-bar";
 import { CategoryNav } from "@/components/shop/category-nav";
+import { MobileCategoryMenu } from "@/components/shop/mobile-category-menu";
 import { CartBadge } from "@/components/shop/cart-badge";
 import { getNavCategories } from "@/lib/catalog";
 import { getCurrentUser } from "@/lib/auth";
@@ -70,6 +71,7 @@ export async function Header() {
       </div>
 
       <CategoryNav categories={categories} />
+      <MobileCategoryMenu categories={categories} />
     </header>
   );
 }
