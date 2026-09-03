@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProductCard } from "@/components/product-card";
 import { searchProducts } from "@/lib/catalog";
+import { getPriceView } from "@/lib/pricing-server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,10 @@ export default async function SearchPage({
 }) {
   const { q } = await searchParams;
   const term = (q ?? "").trim();
-  const results = term.length >= 2 ? await searchProducts(term, 48) : [];
+  const [results, view] = await Promise.all([
+    term.length >= 2 ? searchProducts(term, 48) : Promise.resolve([]),
+    getPriceView(),
+  ]);
 
   return (
     <div className="container-ak py-8">
@@ -34,7 +38,7 @@ export default async function SearchPage({
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {results.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} view={view} />
           ))}
         </div>
       )}

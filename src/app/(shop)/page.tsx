@@ -11,6 +11,7 @@ import {
   getDiscountedProducts,
   getBrands,
 } from "@/lib/catalog";
+import { getPriceView } from "@/lib/pricing-server";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ function SectionTitle({ title, href }: { title: string; href?: string }) {
 }
 
 export default async function HomePage() {
-  const [categories, featured, discounted, brands, heroBanner] = await Promise.all([
+  const [categories, featured, discounted, brands, heroBanner, view] = await Promise.all([
     getNavCategories(),
     getFeaturedProducts(10),
     getDiscountedProducts(10),
@@ -38,6 +39,7 @@ export default async function HomePage() {
       orderBy: { sortOrder: "asc" },
       select: { imageUrl: true },
     }),
+    getPriceView(),
   ]);
 
   return (
@@ -69,7 +71,7 @@ export default async function HomePage() {
           <SectionTitle title="Öne Çıkan Ürünler" href="/kategori/elektrikli-el-aletleri" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {featured.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} view={view} />
             ))}
           </div>
         </section>
@@ -82,7 +84,7 @@ export default async function HomePage() {
             <SectionTitle title="İndirimli Ürünler" />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {discounted.map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard key={p.id} product={p} view={view} />
               ))}
             </div>
           </div>

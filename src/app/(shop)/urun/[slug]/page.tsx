@@ -5,6 +5,8 @@ import { ProductCard } from "@/components/product-card";
 import { Breadcrumb } from "@/components/shop/breadcrumb";
 import { ProductActions } from "@/components/shop/product-actions";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
+import { getPriceView } from "@/lib/pricing-server";
+import { resolvePrice } from "@/lib/pricing";
 import { formatTL, discountPercent } from "@/lib/format";
 import { Star, ShieldCheck, Truck } from "lucide-react";
 
@@ -35,8 +37,12 @@ export default async function ProductPage({
   const p = await getProductBySlug(slug);
   if (!p) notFound();
 
-  const related = await getRelatedProducts(p.categoryId, p.id, 5);
-  const discount = discountPercent(p.listPrice, p.b2cPrice);
+  const [related, view] = await Promise.all([
+    getRelatedProducts(p.categoryId, p.id, 5),
+    getPriceView(),
+  ]);
+  const priced = resolvePrice(p, view);
+  const discount = priced.compareAt ? discountPercent(priced.compareAt, priced.price) : null;
   const specs = (p.technicalSpecs && typeof p.technicalSpecs === "object"
     ? Object.entries(p.technicalSpecs as Record<string, unknown>)
     : []) as [string, unknown][];
@@ -111,16 +117,22 @@ export default async function ProductPage({
           </div>
 
           <div className="mt-5 rounded-xl border border-line bg-paper p-5">
+            {priced.isDealer && (
+              <span className="mb-1 inline-block rounded-md bg-navy px-2 py-0.5 text-xs font-bold text-orange-light">
+                BAYİ FİYATI
+              </span>
+            )}
             <div className="flex items-end gap-3">
-              {discount && (
-                <span className="text-lg text-faint line-through">{formatTL(p.listPrice)}</span>
+              {priced.compareAt && (
+                <span className="text-lg text-faint line-through">{formatTL(priced.compareAt)}</span>
               )}
-              <span className="text-3xl font-extrabold text-navy">{formatTL(p.b2cPrice)}</span>
+              <span className="text-3xl font-extrabold text-navy">{formatTL(priced.price)}</span>
               <span className="pb-1 text-sm text-muted">+KDV</span>
             </div>
-            {p.b2bPrice != null && (
+            {!priced.isDealer && p.b2bPrice != null && (
               <p className="mt-1 text-sm font-medium text-orange">
-                Bayi Fiyatı: {formatTL(p.b2bPrice)} +KDV
+                Bayi Fiyatı: {formatTL(p.b2bPrice)} +KDV —{" "}
+                <a href="/bayi/basvuru" className="underline">bayi olun</a>
               </p>
             )}
 
@@ -130,7 +142,7 @@ export default async function ProductPage({
                   id: p.id,
                   slug: p.slug,
                   name: p.name,
-                  price: p.b2cPrice,
+                  price: priced.price,
                   unit: p.unit,
                   imageUrl: p.images[0]?.url ?? null,
                   stock: p.stock,
@@ -183,7 +195,7 @@ export default async function ProductPage({
           <h2 className="mb-5 text-xl font-bold text-ink">Benzer Ürünler</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {related.map((rp) => (
-              <ProductCard key={rp.id} product={rp} />
+              <ProductCard key={rp.id} product={rp} view={view} />
             ))}
           </div>
         </section>

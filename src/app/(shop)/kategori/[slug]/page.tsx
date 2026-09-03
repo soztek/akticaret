@@ -11,6 +11,7 @@ import {
   getDescendantIds,
   type SortKey,
 } from "@/lib/catalog";
+import { getPriceView } from "@/lib/pricing-server";
 
 export const dynamic = "force-dynamic";
 
@@ -58,9 +59,10 @@ export default async function CategoryPage({
   const inStock = asStr(sp.stok) === "1";
   const sort = (asStr(sp.sirala) as SortKey) ?? "new";
 
-  const [products, brands] = await Promise.all([
+  const [products, brands, view] = await Promise.all([
     getCategoryProducts({ categoryId: cat.id, childIds, brandSlugs, minPrice, maxPrice, inStock, sort }),
     getCategoryBrands(allIds),
+    getPriceView(),
   ]);
 
   const breadcrumb = [
@@ -185,7 +187,7 @@ export default async function CategoryPage({
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {products.map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard key={p.id} product={p} view={view} />
               ))}
             </div>
           )}

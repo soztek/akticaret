@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
 import { formatTL, discountPercent } from "@/lib/format";
+import { resolvePrice, GUEST_VIEW, type PriceView } from "@/lib/pricing";
 import type { ProductCardData } from "@/lib/catalog";
 
-export function ProductCard({ product }: { product: ProductCardData }) {
-  const discount = discountPercent(product.listPrice, product.b2cPrice);
+export function ProductCard({
+  product,
+  view = GUEST_VIEW,
+}: {
+  product: ProductCardData;
+  view?: PriceView;
+}) {
+  const { price, compareAt, isDealer } = resolvePrice(product, view);
+  const discount = compareAt ? discountPercent(compareAt, price) : null;
   const outOfStock = product.stock <= 0;
 
   return (
@@ -19,8 +27,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             %{discount}
           </span>
         )}
+        {isDealer && (
+          <span className="absolute right-2 top-2 rounded-md bg-navy px-2 py-0.5 text-[10px] font-bold text-orange-light">
+            BAYİ
+          </span>
+        )}
         {outOfStock && (
-          <span className="absolute right-2 top-2 rounded-md bg-ink/80 px-2 py-0.5 text-xs font-semibold text-white">
+          <span className="absolute bottom-2 left-2 rounded-md bg-ink/80 px-2 py-0.5 text-xs font-semibold text-white">
             Tükendi
           </span>
         )}
@@ -36,12 +49,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.name}
         </h3>
         <div className="mt-auto pt-2">
-          {discount && (
-            <span className="mr-2 text-xs text-faint line-through">
-              {formatTL(product.listPrice)}
-            </span>
+          {compareAt && (
+            <span className="mr-2 text-xs text-faint line-through">{formatTL(compareAt)}</span>
           )}
-          <span className="text-lg font-bold text-navy">{formatTL(product.b2cPrice)}</span>
+          <span className="text-lg font-bold text-navy">{formatTL(price)}</span>
           <span className="ml-1 text-xs text-muted">+KDV</span>
         </div>
       </div>
