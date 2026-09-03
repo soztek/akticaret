@@ -46,10 +46,10 @@ export default async function HomePage() {
     <>
       <Hero imageUrl={heroBanner?.imageUrl || null} />
 
-      {/* KATEGORİLER (gerçek foto kartlar) */}
+      {/* KATEGORİLER (kompakt, tek satır — yana kayar) */}
       <section className="container-ak py-8">
         <SectionTitle title="Kategoriler" href="/kategoriler" />
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
+        <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
           {categories.map((c) => (
             <CategoryTile
               key={c.id}
@@ -57,6 +57,8 @@ export default async function HomePage() {
               slug={c.slug}
               icon={c.icon}
               imageUrl={c.imageUrl}
+              compact
+              className="w-28 shrink-0 sm:w-32"
             />
           ))}
         </div>
