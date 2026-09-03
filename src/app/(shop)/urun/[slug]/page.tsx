@@ -130,9 +130,12 @@ export default async function ProductPage({
               <span className="pb-1 text-sm text-muted">+KDV</span>
             </div>
             {!priced.isDealer && p.b2bPrice != null && (
-              <p className="mt-1 text-sm font-medium text-orange">
-                Bayi Fiyatı: {formatTL(p.b2bPrice)} +KDV —{" "}
-                <a href="/bayi/basvuru" className="underline">bayi olun</a>
+              <p className="mt-1 text-sm text-muted">
+                Bayilere özel fiyatlar için{" "}
+                <a href="/bayi/basvuru" className="font-medium text-orange underline">
+                  bayi olun
+                </a>
+                .
               </p>
             )}
 
