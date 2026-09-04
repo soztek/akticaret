@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { formatTL } from "@/lib/format";
-import { Search, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
+import { AdminProductSearch } from "@/components/admin/admin-product-search";
+import { normalizeSearch } from "@/lib/search-normalize";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +21,7 @@ export default async function AdminProducts({
 
   const where: Prisma.ProductWhereInput = {};
   if (q) {
-    where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { sku: { contains: q, mode: "insensitive" } },
-    ];
+    where.searchText = { contains: normalizeSearch(q) };
   }
   if (sp.stok === "yok") where.stock = { lte: 0 };
 
@@ -57,22 +56,18 @@ export default async function AdminProducts({
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">Ürünler</h1>
-          <p className="text-sm text-muted">{total.toLocaleString("tr-TR")} ürün</p>
+      <div className="mb-5">
+        <h1 className="text-2xl font-bold text-ink">
+          Ürünler <span className="text-lg font-medium text-muted">({total.toLocaleString("tr-TR")})</span>
+        </h1>
+        <div className="mt-4">
+          <AdminProductSearch />
         </div>
-        <form className="relative" action="/admin/urunler">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Ürün adı veya kod ara…"
-            className="w-64 rounded-lg border border-line bg-paper py-2 pl-3 pr-10 text-sm outline-none focus:border-orange"
-          />
-          <button className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-orange p-1.5 text-white">
-            <Search className="h-4 w-4" />
-          </button>
-        </form>
+        {q && (
+          <p className="mt-2 text-sm text-muted">
+            &quot;{q}&quot; için {total.toLocaleString("tr-TR")} sonuç
+          </p>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-line bg-paper">

@@ -226,6 +226,7 @@ model Product {
   slug       String    @unique
   sku        String?   @unique
   barcode    String?
+  searchText String    @default("") // normalize edilmiş arama metni (ASCII, küçük harf)
   brandId    String?
   brand      Brand?    @relation(fields: [brandId], references: [id])
   categoryId String?

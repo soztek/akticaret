@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+import { normalizeSearch } from "@/lib/search-normalize";
 
 // ============================================================
 // Katalog veri erişimi + serileştirme (Decimal -> number).
@@ -279,12 +280,7 @@ export async function searchProducts(q: string, limit = 20): Promise<ProductCard
   const rows = await db.product.findMany({
     where: {
       isActive: true,
-      OR: [
-        { name: { contains: term, mode: "insensitive" } },
-        { sku: { contains: term, mode: "insensitive" } },
-        { barcode: { contains: term, mode: "insensitive" } },
-        { brand: { name: { contains: term, mode: "insensitive" } } },
-      ],
+      searchText: { contains: normalizeSearch(term) },
     },
     take: limit,
     orderBy: { isFeatured: "desc" },

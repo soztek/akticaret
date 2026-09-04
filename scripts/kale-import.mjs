@@ -11,6 +11,10 @@ function slugify(input) {
   return (input || "").split("").map((ch) => TR[ch] ?? ch).join("")
     .toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/[\s-]+/g, "-").replace(/^-+|-+$/g, "");
 }
+const TRFOLD = { Ç:"c",Ğ:"g",İ:"i",I:"i",Ö:"o",Ş:"s",Ü:"u",ç:"c",ğ:"g",ı:"i",ö:"o",ş:"s",ü:"u" };
+function normalizeSearch(s) {
+  return (s || "").split("").map((c) => TRFOLD[c] ?? c).join("").toLowerCase().replace(/\s+/g, " ").trim();
+}
 
 const db = new PrismaClient();
 const MARKUP = Number(process.env.KALE_MARKUP || 1.3);
@@ -108,6 +112,7 @@ async function main() {
       name: p.name.slice(0, 300),
       sku,
       barcode: null,
+      searchText: normalizeSearch(`${p.name} ${p.code ?? ""}`),
       categoryId,
       shortDescription: null,
       purchasePrice: new Prisma.Decimal(cost),
