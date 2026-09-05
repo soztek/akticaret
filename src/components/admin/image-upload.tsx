@@ -8,11 +8,17 @@ import { UploadCloud, X, Loader2 } from "lucide-react";
 export function ImageUpload({
   name = "imageUrl",
   defaultUrl = null,
+  onChange,
 }: {
   name?: string;
   defaultUrl?: string | null;
+  onChange?: (url: string | null) => void;
 }) {
-  const [url, setUrl] = useState<string | null>(defaultUrl);
+  const [url, setUrlState] = useState<string | null>(defaultUrl);
+  const setUrl = (v: string | null) => {
+    setUrlState(v);
+    onChange?.(v);
+  };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
