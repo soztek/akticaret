@@ -16,6 +16,8 @@ import {
   Mountain,
   Grid2x2,
   Zap,
+  Ruler,
+  Sprout,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,7 +39,12 @@ const MAP: Record<string, LucideIcon> = {
   Mountain,
   Grid2x2,
   Zap,
+  Ruler,
+  Sprout,
 };
+
+/** Seçilebilir ikon adları (admin kategori formu için). */
+export const ICON_NAMES = Object.keys(MAP);
 
 export function CategoryIcon({
   name,
