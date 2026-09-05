@@ -1,16 +1,10 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
-import { CategoryTile } from "@/components/shop/category-tile";
 import { Hero } from "@/components/shop/hero";
 import { PromoBanners } from "@/components/shop/promo-banners";
 import { db } from "@/lib/db";
-import {
-  getNavCategories,
-  getFeaturedProducts,
-  getDiscountedProducts,
-  getBrands,
-} from "@/lib/catalog";
+import { getFeaturedProducts, getDiscountedProducts, getBrands } from "@/lib/catalog";
 import { getPriceView } from "@/lib/pricing-server";
 
 export const dynamic = "force-dynamic";
@@ -29,8 +23,8 @@ function SectionTitle({ title, href }: { title: string; href?: string }) {
 }
 
 export default async function HomePage() {
-  const [categories, featured, discounted, brands, heroBanner, view] = await Promise.all([
-    getNavCategories(),
+  const now = new Date();
+  const [featured, discounted, brands, heroBanner, view, campaigns] = await Promise.all([
     getFeaturedProducts(10),
     getDiscountedProducts(10),
     getBrands(),
@@ -40,36 +34,43 @@ export default async function HomePage() {
       select: { imageUrl: true },
     }),
     getPriceView(),
+    db.promoCampaign.findMany({
+      where: {
+        isPublished: true,
+        AND: [
+          { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+          { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+        ],
+      },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      take: 6,
+      include: { product: { select: { slug: true } } },
+    }),
   ]);
 
   return (
     <>
       <Hero imageUrl={heroBanner?.imageUrl || null} />
 
-      {/* KATEGORİLER (kompakt, tek satır — yana kayar) */}
+      {/* KAMPANYALAR (admin'den yayınlananlar) */}
       <section className="container-ak py-8">
-        <SectionTitle title="Kategoriler" href="/kategoriler" />
-        <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
-          {categories.map((c) => (
-            <CategoryTile
-              key={c.id}
-              name={c.name}
-              slug={c.slug}
-              icon={c.icon}
-              imageUrl={c.imageUrl}
-              compact
-              className="w-28 shrink-0 sm:w-32"
-            />
-          ))}
-        </div>
+        <SectionTitle title="Kampanyalar" href="/kampanyalar" />
+        <PromoBanners
+          campaigns={campaigns.map((c) => ({
+            id: c.id,
+            title: c.title,
+            slug: c.slug,
+            badge: c.badge,
+            price: c.price != null ? Number(c.price) : null,
+            compareAtPrice: c.compareAtPrice != null ? Number(c.compareAtPrice) : null,
+            productSlug: c.product?.slug ?? null,
+          }))}
+        />
       </section>
-
-      {/* KAMPANYA BANNER ŞERİDİ */}
-      <PromoBanners />
 
       {/* ÖNE ÇIKANLAR */}
       {featured.length > 0 && (
-        <section className="container-ak py-8">
+        <section className="container-ak py-8 pt-0">
           <SectionTitle title="Öne Çıkan Ürünler" href="/kategori/elektrikli-el-aletleri" />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {featured.map((p) => (
