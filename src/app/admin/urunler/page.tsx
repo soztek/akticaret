@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { formatTL } from "@/lib/format";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { AdminProductSearch } from "@/components/admin/admin-product-search";
 import { normalizeSearch } from "@/lib/search-normalize";
 
@@ -57,9 +57,17 @@ export default async function AdminProducts({
   return (
     <div>
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-ink">
-          Ürünler <span className="text-lg font-medium text-muted">({total.toLocaleString("tr-TR")})</span>
-        </h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-ink">
+            Ürünler <span className="text-lg font-medium text-muted">({total.toLocaleString("tr-TR")})</span>
+          </h1>
+          <Link
+            href="/admin/urunler/yeni"
+            className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
+          >
+            <Plus className="h-4 w-4" /> Yeni Ürün
+          </Link>
+        </div>
         <div className="mt-4">
           <AdminProductSearch />
         </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import Image from "next/image";
 import { updateProductAction, type ProductFormState } from "@/lib/actions/admin-products";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { FormError } from "@/components/form";
 
 type P = {
@@ -57,24 +57,22 @@ export function ProductEditForm({
       )}
       <FormError message={state?.error} />
 
-      <div className="flex gap-4">
-        {product.imageUrl && (
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-line bg-mist">
-            <Image src={product.imageUrl} alt={product.name} fill className="object-contain" sizes="96px" />
-          </div>
-        )}
-        <div className="flex-1 space-y-3">
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-ink">Ürün Adı</span>
-            <input
-              name="name"
-              defaultValue={product.name}
-              required
-              className="rounded-lg border border-line bg-paper px-3 py-2 outline-none focus:border-orange"
-            />
-          </label>
-          <p className="text-xs text-muted">Kod: {product.sku ?? "—"} · Slug: {product.slug}</p>
-        </div>
+      <div>
+        <p className="mb-1.5 text-sm font-medium text-ink">Ürün Görseli</p>
+        <ImageUpload name="imageUrl" defaultUrl={product.imageUrl} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-ink">Ürün Adı</span>
+          <input
+            name="name"
+            defaultValue={product.name}
+            required
+            className="rounded-lg border border-line bg-paper px-3 py-2 outline-none focus:border-orange"
+          />
+        </label>
+        <p className="text-xs text-muted">Kod: {product.sku ?? "—"} · Slug: {product.slug}</p>
       </div>
 
       <label className="flex flex-col gap-1.5 text-sm">
