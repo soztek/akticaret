@@ -23,6 +23,8 @@ export function CampaignForm({
     badge: string | null;
     productId: string | null;
     isPublished: boolean;
+    startsAt: string | null;
+    endsAt: string | null;
     linkedProduct: { name: string; slug: string } | null;
   };
 }) {
@@ -38,6 +40,8 @@ export function CampaignForm({
   const [productId, setProductId] = useState<string | null>(campaign?.productId ?? null);
   const [linkedName, setLinkedName] = useState<string | null>(campaign?.linkedProduct?.name ?? null);
   const [isPublished, setIsPublished] = useState(campaign?.isPublished ?? false);
+  const [startsAt, setStartsAt] = useState(campaign?.startsAt ?? "");
+  const [endsAt, setEndsAt] = useState(campaign?.endsAt ?? "");
 
   // Canlı ürün arama
   const [q, setQ] = useState("");
@@ -105,6 +109,8 @@ export function CampaignForm({
       badge: badge || null,
       productId,
       isPublished,
+      startsAt: startsAt || null,
+      endsAt: endsAt || null,
     };
     start(async () => {
       const r = await saveCampaign(input);
@@ -192,6 +198,20 @@ export function CampaignForm({
           <input value={badge} onChange={(e) => setBadge(e.target.value)} placeholder="%30, YENİ…" className="rounded-lg border border-line bg-paper px-3 py-2 outline-none focus:border-orange" />
         </label>
       </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-ink">Başlangıç Tarihi</span>
+          <input type="date" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="rounded-lg border border-line bg-paper px-3 py-2 outline-none focus:border-orange" />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-ink">Bitiş (Geçerlilik) Tarihi</span>
+          <input type="date" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="rounded-lg border border-line bg-paper px-3 py-2 outline-none focus:border-orange" />
+        </label>
+      </div>
+      <p className="-mt-2 text-xs text-muted">
+        Boş bırakılırsa süresiz geçerlidir. Bitiş tarihi geçince kampanya otomatik olarak yayından kalkar.
+      </p>
 
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="accent-orange" />

@@ -7,8 +7,8 @@ import { ProductActions } from "@/components/shop/product-actions";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
 import { getPriceView } from "@/lib/pricing-server";
 import { resolvePrice } from "@/lib/pricing";
-import { formatTL, discountPercent } from "@/lib/format";
-import { Star, ShieldCheck, Truck } from "lucide-react";
+import { formatTL, discountPercent, formatDate } from "@/lib/format";
+import { Star, ShieldCheck, Truck, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -147,9 +147,22 @@ export default async function ProductPage({
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
             <span className="flex items-center gap-1.5"><Truck className="h-4 w-4 text-orange" /> Hızlı teslimat</span>
             <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-orange" /> Güvenli ödeme</span>
+            {p.activeCampaign && (
+              <a
+                href={`/kampanyalar/${p.activeCampaign.slug}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-orange/10 px-3 py-1 font-semibold text-orange"
+              >
+                <Tag className="h-4 w-4" /> Kampanyalı Ürün
+                {p.activeCampaign.endsAt && (
+                  <span className="font-normal text-orange-600">
+                    · son {formatDate(p.activeCampaign.endsAt)}
+                  </span>
+                )}
+              </a>
+            )}
             {p.warranty && <span>Garanti: {p.warranty}</span>}
           </div>
 

@@ -18,6 +18,8 @@ export type CampaignInput = {
   badge?: string | null;
   productId?: string | null;
   isPublished: boolean;
+  startsAt?: string | null; // "YYYY-MM-DD"
+  endsAt?: string | null; // "YYYY-MM-DD"
 };
 
 export type CampaignResult = { ok?: boolean; error?: string } | undefined;
@@ -43,6 +45,8 @@ export async function saveCampaign(input: CampaignInput): Promise<CampaignResult
     badge: input.badge || null,
     productId: input.productId || null,
     isPublished: input.isPublished,
+    startsAt: input.startsAt ? new Date(input.startsAt) : null,
+    endsAt: input.endsAt ? new Date(`${input.endsAt}T23:59:59`) : null,
   };
 
   if (input.id) {

@@ -40,6 +40,8 @@ export default async function EditCampaignPage({
           badge: c.badge,
           productId: c.productId,
           isPublished: c.isPublished,
+          startsAt: c.startsAt ? c.startsAt.toISOString().slice(0, 10) : null,
+          endsAt: c.endsAt ? c.endsAt.toISOString().slice(0, 10) : null,
           linkedProduct: c.product ? { name: c.product.name, slug: c.product.slug } : null,
         }}
       />

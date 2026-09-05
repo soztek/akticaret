@@ -225,6 +225,18 @@ export async function getProductBySlug(slug: string) {
       category: { select: { name: true, slug: true, parent: { select: { name: true, slug: true } } } },
       images: { orderBy: { sortOrder: "asc" }, select: { url: true, alt: true } },
       reviews: { where: { isApproved: true }, select: { rating: true } },
+      promoCampaigns: {
+        where: {
+          isPublished: true,
+          AND: [
+            { OR: [{ startsAt: null }, { startsAt: { lte: new Date() } }] },
+            { OR: [{ endsAt: null }, { endsAt: { gte: new Date() } }] },
+          ],
+        },
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { slug: true, badge: true, endsAt: true },
+      },
     },
   });
   if (!p) return null;
@@ -254,6 +266,13 @@ export async function getProductBySlug(slug: string) {
     images: p.images,
     ratingAvg: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
     ratingCount: ratings.length,
+    activeCampaign: p.promoCampaigns[0]
+      ? {
+          slug: p.promoCampaigns[0].slug,
+          badge: p.promoCampaigns[0].badge,
+          endsAt: p.promoCampaigns[0].endsAt,
+        }
+      : null,
   };
 }
 
