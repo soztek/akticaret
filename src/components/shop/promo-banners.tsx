@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Percent, Tag, ArrowRight } from "lucide-react";
-import { formatTL, discountPercent } from "@/lib/format";
+import { formatTL, discountPercent, formatBadge } from "@/lib/format";
 
 export type PromoCampaignCard = {
   id: string;
@@ -41,7 +41,8 @@ export function PromoBanners({ campaigns }: { campaigns: PromoCampaignCard[] }) 
           c.price != null && c.compareAtPrice != null
             ? discountPercent(c.compareAtPrice, c.price)
             : null;
-        const big = c.badge || (disc != null ? `%${disc} İNDİRİM` : c.price != null ? formatTL(c.price) : null);
+        const badge = formatBadge(c.badge);
+        const big = badge || (disc != null ? `%${disc} İNDİRİM` : c.price != null ? formatTL(c.price) : null);
 
         return (
           <Link

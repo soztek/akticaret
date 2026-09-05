@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Plus, Tag, Pencil } from "lucide-react";
 import { db } from "@/lib/db";
-import { formatTL } from "@/lib/format";
+import { formatTL, formatBadge } from "@/lib/format";
 import { CampaignRowActions } from "./campaign-row-actions";
 
 export const dynamic = "force-dynamic";
@@ -57,7 +57,7 @@ export default async function AdminCampaigns() {
                       <Link href={`/admin/kampanyalar/${c.id}`} className="inline-flex items-center gap-1 font-medium text-ink hover:text-orange">
                         {c.title} <Pencil className="h-3 w-3 opacity-50" />
                       </Link>
-                      {c.badge && <span className="rounded bg-orange px-1.5 py-0.5 text-[10px] font-bold text-white">{c.badge}</span>}
+                      {c.badge && <span className="rounded bg-orange px-1.5 py-0.5 text-[10px] font-bold text-white">{formatBadge(c.badge)}</span>}
                     </div>
                   </td>
                   <td className="px-4 py-2.5 text-muted">{c.product?.name ?? "—"}</td>

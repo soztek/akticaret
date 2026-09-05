@@ -29,3 +29,16 @@ export function discountPercent(list: number, sale: number): number | null {
 export function grossPrice(net: number, vatRate = 20): number {
   return Math.round((net * (1 + vatRate / 100) + Number.EPSILON) * 100) / 100;
 }
+
+/**
+ * Kampanya rozetini normalize eder.
+ * Kullanıcı sadece sayı yazdıysa ("20", "%20", "20 %") → "%20".
+ * Metin yazdıysa ("Yılbaşı", "2. Ürün Bedava") aynen kalır.
+ */
+export function formatBadge(badge: string | null | undefined): string | null {
+  if (!badge) return null;
+  const t = badge.trim();
+  if (!t) return null;
+  const m = t.match(/^%?\s*(\d+(?:[.,]\d+)?)\s*%?$/);
+  return m ? `%${m[1]}` : t;
+}

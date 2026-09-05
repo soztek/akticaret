@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/rbac";
 import { uniqueSlug } from "@/lib/slug";
+import { formatBadge } from "@/lib/format";
 
 export type CampaignInput = {
   id?: string;
@@ -42,7 +43,7 @@ export async function saveCampaign(input: CampaignInput): Promise<CampaignResult
     description: input.description || null,
     price: dec(input.price),
     compareAtPrice: dec(input.compareAtPrice),
-    badge: input.badge || null,
+    badge: formatBadge(input.badge),
     productId: input.productId || null,
     isPublished: input.isPublished,
     startsAt: input.startsAt ? new Date(input.startsAt) : null,

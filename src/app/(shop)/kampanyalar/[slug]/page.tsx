@@ -4,7 +4,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { MessageCircle, ArrowRight, Tag } from "lucide-react";
 import { db } from "@/lib/db";
-import { formatTL, discountPercent } from "@/lib/format";
+import { formatTL, discountPercent, formatBadge } from "@/lib/format";
 import { Breadcrumb } from "@/components/shop/breadcrumb";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +53,7 @@ export default async function CampaignDetail({
           )}
           {(c.badge || disc) && (
             <span className="absolute left-3 top-3 rounded-md bg-orange px-2.5 py-1 text-sm font-bold text-white">
-              {c.badge || `%${disc} İndirim`}
+              {formatBadge(c.badge) || `%${disc} İndirim`}
             </span>
           )}
         </div>

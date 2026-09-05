@@ -3,7 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { Tag } from "lucide-react";
 import { db } from "@/lib/db";
-import { formatTL, discountPercent } from "@/lib/format";
+import { formatTL, discountPercent, formatBadge } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +62,7 @@ export default async function CampaignsPage() {
                   )}
                   {(c.badge || disc) && (
                     <span className="absolute left-2 top-2 rounded-md bg-orange px-2 py-0.5 text-xs font-bold text-white">
-                      {c.badge || `%${disc}`}
+                      {formatBadge(c.badge) || `%${disc}`}
                     </span>
                   )}
                 </div>
