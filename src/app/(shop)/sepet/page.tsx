@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, Truck } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
-import { formatTL } from "@/lib/format";
+import { formatTL, grossPrice } from "@/lib/format";
 import { computeTotals, FREE_SHIPPING_THRESHOLD } from "@/lib/order-calc";
 import {
   getCart,
@@ -67,7 +67,7 @@ export default function CartPage() {
                   {l.name}
                 </Link>
                 <p className="mt-0.5 text-sm text-muted">
-                  {formatTL(l.price)} <span className="text-xs">+KDV / {l.unit}</span>
+                  {formatTL(grossPrice(l.price, l.vatRate))} <span className="text-xs">/ {l.unit}</span>
                 </p>
                 <div className="mt-2 flex items-center gap-3">
                   <div className="flex items-center rounded-lg border border-line">
@@ -85,8 +85,7 @@ export default function CartPage() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-bold text-navy">{formatTL(l.price * l.qty)}</p>
-                <p className="text-xs text-muted">+KDV</p>
+                <p className="font-bold text-navy">{formatTL(grossPrice(l.price * l.qty, l.vatRate))}</p>
               </div>
             </div>
           ))}
@@ -107,12 +106,8 @@ export default function CartPage() {
 
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-muted">Ara Toplam (KDV hariç)</dt>
-              <dd className="text-ink">{formatTL(totals.subtotal)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">KDV</dt>
-              <dd className="text-ink">{formatTL(totals.vatTotal)}</dd>
+              <dt className="text-muted">Ara Toplam</dt>
+              <dd className="text-ink">{formatTL(totals.subtotalGross)}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted">Kargo</dt>

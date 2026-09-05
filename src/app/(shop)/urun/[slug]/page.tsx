@@ -7,7 +7,7 @@ import { ProductActions } from "@/components/shop/product-actions";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
 import { getPriceView } from "@/lib/pricing-server";
 import { resolvePrice } from "@/lib/pricing";
-import { formatTL, discountPercent, formatDate } from "@/lib/format";
+import { formatTL, discountPercent, formatDate, grossPrice } from "@/lib/format";
 import { Star, ShieldCheck, Truck, Tag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -115,10 +115,13 @@ export default async function ProductPage({
             )}
             <div className="flex items-end gap-3">
               {priced.compareAt && (
-                <span className="text-lg text-faint line-through">{formatTL(priced.compareAt)}</span>
+                <span className="text-lg text-faint line-through">
+                  {formatTL(grossPrice(priced.compareAt, p.vatRate))}
+                </span>
               )}
-              <span className="text-3xl font-extrabold text-navy">{formatTL(priced.price)}</span>
-              <span className="pb-1 text-sm text-muted">+KDV</span>
+              <span className="text-3xl font-extrabold text-navy">
+                {formatTL(grossPrice(priced.price, p.vatRate))}
+              </span>
             </div>
             {!priced.isDealer && p.b2bPrice != null && (
               <p className="mt-1 text-sm text-muted">

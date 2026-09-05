@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
 import { AddToCartButton } from "@/components/shop/add-to-cart-button";
-import { formatTL, discountPercent } from "@/lib/format";
+import { formatTL, discountPercent, grossPrice } from "@/lib/format";
 import { resolvePrice, GUEST_VIEW, type PriceView } from "@/lib/pricing";
 import type { ProductCardData } from "@/lib/catalog";
 
@@ -54,10 +54,13 @@ export function ProductCard({
       <div className="flex items-end justify-between gap-2 p-3 pt-2">
         <div className="min-w-0">
           {compareAt && (
-            <span className="block text-xs text-faint line-through">{formatTL(compareAt)}</span>
+            <span className="block text-xs text-faint line-through">
+              {formatTL(grossPrice(compareAt, product.vatRate))}
+            </span>
           )}
-          <span className="text-lg font-bold leading-tight text-navy">{formatTL(price)}</span>
-          <span className="ml-1 text-xs text-muted">+KDV</span>
+          <span className="text-lg font-bold leading-tight text-navy">
+            {formatTL(grossPrice(price, product.vatRate))}
+          </span>
         </div>
         <AddToCartButton product={product} view={view} variant="icon" />
       </div>

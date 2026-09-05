@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, Loader2 } from "lucide-react";
-import { formatTL } from "@/lib/format";
+import { formatTL, grossPrice } from "@/lib/format";
 import type { ProductCardData } from "@/lib/catalog";
 
 export function SearchBar() {
@@ -81,7 +81,7 @@ export function SearchBar() {
             >
               <span className="line-clamp-1 text-ink">{p.name}</span>
               <span className="whitespace-nowrap font-semibold text-navy">
-                {formatTL(p.b2cPrice)}
+                {formatTL(grossPrice(p.b2cPrice, p.vatRate))}
               </span>
             </Link>
           ))}

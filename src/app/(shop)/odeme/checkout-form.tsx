@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Landmark, CreditCard, Wallet, Loader2 } from "lucide-react";
-import { formatTL } from "@/lib/format";
+import { formatTL, grossPrice } from "@/lib/format";
 import { computeTotals } from "@/lib/order-calc";
 import { getCart, clearCart, onCartChange, type CartLine } from "@/lib/cart-client";
 import { createOrderAction } from "@/lib/actions/orders";
@@ -156,13 +156,12 @@ export function CheckoutForm({
           {lines.map((l) => (
             <li key={l.productId} className="flex justify-between gap-2">
               <span className="line-clamp-1 text-muted">{l.qty}× {l.name}</span>
-              <span className="whitespace-nowrap text-ink">{formatTL(l.price * l.qty)}</span>
+              <span className="whitespace-nowrap text-ink">{formatTL(grossPrice(l.price * l.qty, l.vatRate))}</span>
             </li>
           ))}
         </ul>
         <dl className="mt-4 space-y-2 border-t border-line pt-3 text-sm">
-          <div className="flex justify-between"><dt className="text-muted">Ara Toplam</dt><dd>{formatTL(totals.subtotal)}</dd></div>
-          <div className="flex justify-between"><dt className="text-muted">KDV</dt><dd>{formatTL(totals.vatTotal)}</dd></div>
+          <div className="flex justify-between"><dt className="text-muted">Ara Toplam</dt><dd>{formatTL(totals.subtotalGross)}</dd></div>
           <div className="flex justify-between"><dt className="text-muted">Kargo</dt><dd className={totals.freeShipping ? "font-semibold text-success" : ""}>{totals.freeShipping ? "Bedava" : formatTL(totals.shipping)}</dd></div>
           <div className="flex justify-between border-t border-line pt-2"><dt className="text-base font-bold text-ink">Genel Toplam</dt><dd className="text-lg font-extrabold text-navy">{formatTL(totals.grandTotal)}</dd></div>
         </dl>

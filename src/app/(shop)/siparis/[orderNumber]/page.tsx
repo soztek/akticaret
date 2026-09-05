@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Landmark, Package } from "lucide-react";
 import { db } from "@/lib/db";
-import { formatTL, formatDate } from "@/lib/format";
+import { formatTL, formatDate, grossPrice } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Sipariş Alındı", robots: { index: false } };
@@ -73,13 +73,12 @@ export default async function OrderConfirmation({
                 {it.quantity}× {it.productName}
                 {it.sku && <span className="ml-1 text-xs text-faint">({it.sku})</span>}
               </span>
-              <span className="whitespace-nowrap text-ink">{formatTL(Number(it.lineTotal))}</span>
+              <span className="whitespace-nowrap text-ink">{formatTL(grossPrice(Number(it.lineTotal), it.vatRate))}</span>
             </li>
           ))}
         </ul>
         <dl className="mt-3 space-y-1.5 border-t border-line pt-3 text-sm">
-          <div className="flex justify-between"><dt className="text-muted">Ara Toplam</dt><dd>{formatTL(Number(order.subtotal))}</dd></div>
-          <div className="flex justify-between"><dt className="text-muted">KDV</dt><dd>{formatTL(Number(order.vatTotal))}</dd></div>
+          <div className="flex justify-between"><dt className="text-muted">Ara Toplam</dt><dd>{formatTL(Number(order.subtotal) + Number(order.vatTotal))}</dd></div>
           <div className="flex justify-between"><dt className="text-muted">Kargo</dt><dd>{Number(order.shippingTotal) === 0 ? "Bedava" : formatTL(Number(order.shippingTotal))}</dd></div>
           <div className="flex justify-between border-t border-line pt-2"><dt className="font-bold text-ink">Genel Toplam</dt><dd className="text-lg font-extrabold text-navy">{formatTL(Number(order.grandTotal))}</dd></div>
         </dl>

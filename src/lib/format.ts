@@ -26,3 +26,8 @@ export function discountPercent(list: number, sale: number): number | null {
   if (list <= 0 || sale >= list) return null;
   return Math.round(((list - sale) / list) * 100);
 }
+
+/** KDV hariç net fiyattan KDV dahil brüt fiyat. */
+export function grossPrice(net: number, vatRate = 20): number {
+  return Math.round((net * (1 + vatRate / 100) + Number.EPSILON) * 100) / 100;
+}

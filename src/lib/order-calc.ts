@@ -7,6 +7,7 @@ export type CalcLine = { price: number; qty: number; vatRate?: number };
 
 export type OrderTotals = {
   subtotal: number; // KDV hariç ürün toplamı
+  subtotalGross: number; // KDV dahil ürün toplamı (subtotal + vatTotal)
   vatTotal: number; // toplam KDV
   shipping: number; // kargo
   grandTotal: number; // genel toplam (KDV + kargo dahil)
@@ -29,6 +30,7 @@ export function computeTotals(lines: CalcLine[]): OrderTotals {
   const shipping = freeShipping ? 0 : SHIPPING_COST;
   return {
     subtotal,
+    subtotalGross: round2(subtotal + vatTotal),
     vatTotal,
     shipping,
     grandTotal: round2(subtotal + vatTotal + shipping),

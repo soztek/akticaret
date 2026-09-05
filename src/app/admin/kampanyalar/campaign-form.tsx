@@ -6,9 +6,9 @@ import { Search, Loader2, X, Link2 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { FormError } from "@/components/form";
 import { saveCampaign, type CampaignInput } from "@/lib/actions/admin-campaigns";
-import { formatTL } from "@/lib/format";
+import { formatTL, grossPrice } from "@/lib/format";
 
-type Linked = { id: string; name: string; slug: string; imageUrl: string | null; price: number; listPrice: number };
+type Linked = { id: string; name: string; slug: string; imageUrl: string | null; price: number; listPrice: number; vatRate: number };
 
 export function CampaignForm({
   campaign,
@@ -61,8 +61,8 @@ export function CampaignForm({
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
         setResults(
-          (data.results ?? []).map((p: { id: string; name: string; slug: string; imageUrl: string | null; b2cPrice: number; listPrice: number }) => ({
-            id: p.id, name: p.name, slug: p.slug, imageUrl: p.imageUrl, price: p.b2cPrice, listPrice: p.listPrice,
+          (data.results ?? []).map((p: { id: string; name: string; slug: string; imageUrl: string | null; b2cPrice: number; listPrice: number; vatRate: number }) => ({
+            id: p.id, name: p.name, slug: p.slug, imageUrl: p.imageUrl, price: p.b2cPrice, listPrice: p.listPrice, vatRate: p.vatRate,
           })),
         );
         setOpen(true);
@@ -86,8 +86,8 @@ export function CampaignForm({
     setLinkedName(p.name);
     if (!title.trim()) setTitle(p.name);
     if (!imageUrl) setImageUrl(p.imageUrl);
-    if (!price) setPrice(String(p.price));
-    if (!compareAt && p.listPrice > p.price) setCompareAt(String(p.listPrice));
+    if (!price) setPrice(String(grossPrice(p.price, p.vatRate)));
+    if (!compareAt && p.listPrice > p.price) setCompareAt(String(grossPrice(p.listPrice, p.vatRate)));
     setOpen(false);
     setQ("");
   }
@@ -158,7 +158,7 @@ export function CampaignForm({
                       {p.imageUrl && <Image src={p.imageUrl} alt="" fill className="object-contain" sizes="32px" />}
                     </span>
                     <span className="line-clamp-1 flex-1 text-ink">{p.name}</span>
-                    <span className="whitespace-nowrap font-semibold text-navy">{formatTL(p.price)}</span>
+                    <span className="whitespace-nowrap font-semibold text-navy">{formatTL(grossPrice(p.price, p.vatRate))}</span>
                   </button>
                 ))}
               </div>
