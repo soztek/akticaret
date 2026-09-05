@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { createProductAction, type ProductFormState } from "@/lib/actions/admin-products";
-import { ImageUpload } from "@/components/admin/image-upload";
+import { MultiImageUpload } from "@/components/admin/multi-image-upload";
 import { FormError, SubmitButton } from "@/components/form";
 
 function Num({ label, name, required }: { label: string; name: string; required?: boolean }) {
@@ -28,8 +28,8 @@ export function NewProductForm({ categories }: { categories: { id: string; name:
       <FormError message={state?.error} />
 
       <div>
-        <p className="mb-1.5 text-sm font-medium text-ink">Ürün Görseli</p>
-        <ImageUpload name="imageUrl" />
+        <p className="mb-1.5 text-sm font-medium text-ink">Ürün Görselleri</p>
+        <MultiImageUpload name="imageUrls" />
       </div>
 
       <label className="flex flex-col gap-1.5 text-sm">

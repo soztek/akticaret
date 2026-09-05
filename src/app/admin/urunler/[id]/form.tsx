@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { updateProductAction, type ProductFormState } from "@/lib/actions/admin-products";
-import { ImageUpload } from "@/components/admin/image-upload";
+import { MultiImageUpload } from "@/components/admin/multi-image-upload";
 import { FormError } from "@/components/form";
 
 type P = {
@@ -19,7 +19,7 @@ type P = {
   isActive: boolean;
   isFeatured: boolean;
   categoryId: string | null;
-  imageUrl: string | null;
+  images: string[];
 };
 
 function Num({ label, name, defaultValue }: { label: string; name: string; defaultValue: number | null }) {
@@ -58,8 +58,8 @@ export function ProductEditForm({
       <FormError message={state?.error} />
 
       <div>
-        <p className="mb-1.5 text-sm font-medium text-ink">Ürün Görseli</p>
-        <ImageUpload name="imageUrl" defaultUrl={product.imageUrl} />
+        <p className="mb-1.5 text-sm font-medium text-ink">Ürün Görselleri</p>
+        <MultiImageUpload name="imageUrls" defaultUrls={product.images} />
       </div>
 
       <div className="space-y-1.5">

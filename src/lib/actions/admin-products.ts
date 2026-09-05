@@ -16,15 +16,15 @@ const dec = (v: FormDataEntryValue | null) => {
   return Number.isFinite(n) ? n : null;
 };
 
-/** Görsel URL'sini birincil ProductImage olarak ayarla (varsa eskiyi değiştir). */
-async function setPrimaryImage(productId: string, imageUrl: string | null) {
-  if (!imageUrl) return;
-  const existing = await db.productImage.findFirst({
-    where: { productId, isPrimary: true },
-  });
-  if (existing?.url === imageUrl) return;
-  await db.productImage.deleteMany({ where: { productId, isPrimary: true } });
-  await db.productImage.create({ data: { productId, url: imageUrl, isPrimary: true, sortOrder: 0 } });
+/** Ürün görsellerini gönderilen sırayla ayarla (ilk = kapak). Replace-all. */
+async function setImages(productId: string, urls: string[]) {
+  const clean = urls.map((u) => u.trim()).filter(Boolean);
+  await db.productImage.deleteMany({ where: { productId } });
+  if (clean.length) {
+    await db.productImage.createMany({
+      data: clean.map((url, i) => ({ productId, url, isPrimary: i === 0, sortOrder: i })),
+    });
+  }
 }
 
 export async function updateProductAction(
@@ -69,7 +69,7 @@ export async function updateProductAction(
     },
   });
 
-  await setPrimaryImage(id, String(formData.get("imageUrl") ?? "") || null);
+  await setImages(id, formData.getAll("imageUrls").map(String));
 
   // Denetim kaydı
   await db.auditLog.create({
@@ -109,7 +109,7 @@ export async function createProductAction(
   const isFeatured = formData.get("isFeatured") === "on";
   const categoryId = String(formData.get("categoryId") ?? "") || null;
   const skuRaw = String(formData.get("sku") ?? "").trim() || null;
-  const imageUrl = String(formData.get("imageUrl") ?? "") || null;
+  const imageUrls = formData.getAll("imageUrls").map(String).filter(Boolean);
 
   // SKU benzersizlik kontrolü
   if (skuRaw) {
@@ -141,9 +141,7 @@ export async function createProductAction(
     },
   });
 
-  if (imageUrl) {
-    await db.productImage.create({ data: { productId: product.id, url: imageUrl, isPrimary: true } });
-  }
+  await setImages(product.id, imageUrls);
 
   await db.auditLog.create({
     data: {

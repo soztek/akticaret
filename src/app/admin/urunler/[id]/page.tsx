@@ -15,7 +15,7 @@ export default async function EditProductPage({
   const [product, categories] = await Promise.all([
     db.product.findUnique({
       where: { id },
-      include: { images: { orderBy: { sortOrder: "asc" }, take: 1 } },
+      include: { images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }] } },
     }),
     db.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
@@ -43,7 +43,7 @@ export default async function EditProductPage({
           isActive: product.isActive,
           isFeatured: product.isFeatured,
           categoryId: product.categoryId,
-          imageUrl: product.images[0]?.url ?? null,
+          images: product.images.map((i) => i.url),
         }}
         categories={categories}
       />

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ProductImage } from "@/components/product-image";
 import { ProductCard } from "@/components/product-card";
 import { Breadcrumb } from "@/components/shop/breadcrumb";
+import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductActions } from "@/components/shop/product-actions";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
 import { getPriceView } from "@/lib/pricing-server";
@@ -86,17 +86,8 @@ export default async function ProductPage({
       <Breadcrumb items={breadcrumb} />
 
       <div className="mt-4 grid gap-8 lg:grid-cols-2">
-        {/* Görsel */}
-        <div className="space-y-3">
-          <div className="relative aspect-square overflow-hidden rounded-2xl border border-line bg-paper">
-            <ProductImage src={p.images[0]?.url ?? null} alt={p.name} sizes="(max-width:1024px) 100vw, 50vw" />
-            {discount && (
-              <span className="absolute left-3 top-3 rounded-md bg-orange px-2.5 py-1 text-sm font-bold text-white">
-                %{discount} İndirim
-              </span>
-            )}
-          </div>
-        </div>
+        {/* Görsel galerisi */}
+        <ProductGallery images={p.images} name={p.name} discount={discount} />
 
         {/* Bilgi */}
         <div>
