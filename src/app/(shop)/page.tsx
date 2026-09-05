@@ -64,6 +64,7 @@ export default async function HomePage() {
             price: c.price != null ? Number(c.price) : null,
             compareAtPrice: c.compareAtPrice != null ? Number(c.compareAtPrice) : null,
             productSlug: c.product?.slug ?? null,
+            imageUrl: c.imageUrl,
           }))}
         />
       </section>

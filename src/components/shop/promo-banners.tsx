@@ -10,6 +10,7 @@ export type PromoCampaignCard = {
   price: number | null;
   compareAtPrice: number | null;
   productSlug: string | null;
+  imageUrl: string | null;
 };
 
 /** Ana sayfa kampanya banner şeridi — admin'de yayınlanan kampanyalardan beslenir. */
@@ -46,9 +47,9 @@ export function PromoBanners({ campaigns }: { campaigns: PromoCampaignCard[] }) 
           <Link
             key={c.id}
             href={href}
-            className="group relative flex items-center justify-between overflow-hidden rounded-xl bg-navy p-5 text-paper transition hover:shadow-lg"
+            className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-navy p-5 text-paper transition hover:shadow-lg"
           >
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <span className="text-xs font-bold uppercase tracking-widest text-orange-light">
                 Kampanya
               </span>
@@ -58,7 +59,16 @@ export function PromoBanners({ campaigns }: { campaigns: PromoCampaignCard[] }) 
                 Alışverişe Başla
               </span>
             </div>
-            {c.badge ? (
+            {c.imageUrl ? (
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-white/95 sm:h-28 sm:w-28">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={c.imageUrl}
+                  alt={c.title}
+                  className="h-full w-full object-contain p-1.5 transition group-hover:scale-105"
+                />
+              </div>
+            ) : c.badge ? (
               <Tag className="h-16 w-16 shrink-0 text-white/10 transition group-hover:text-white/20" />
             ) : (
               <Percent className="h-16 w-16 shrink-0 text-white/10 transition group-hover:text-white/20" />
