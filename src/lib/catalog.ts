@@ -13,6 +13,7 @@ export type ProductCardData = {
   slug: string;
   sku: string | null;
   unit: string;
+  vatRate: number;
   brandName: string | null;
   categoryName: string | null;
   categorySlug: string | null;
@@ -30,6 +31,7 @@ const productCardSelect = {
   slug: true,
   sku: true,
   unit: true,
+  vatRate: true,
   listPrice: true,
   b2cPrice: true,
   b2bPrice: true,
@@ -53,6 +55,7 @@ function toCard(p: ProductCardRow): ProductCardData {
     slug: p.slug,
     sku: p.sku,
     unit: p.unit,
+    vatRate: p.vatRate,
     brandName: p.brand?.name ?? null,
     categoryName: p.category?.name ?? null,
     categorySlug: p.category?.slug ?? null,
