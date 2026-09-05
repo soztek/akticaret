@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { formatTL } from "@/lib/format";
+import { ORDER_STATUS_LABEL, ORDER_STATUS_BADGE } from "@/lib/order-labels";
 import {
   Package,
   FolderTree,
@@ -113,7 +114,11 @@ export default async function AdminDashboard() {
                     <td className="px-4 py-2 font-medium text-ink">{o.orderNumber}</td>
                     <td className="px-4 py-2 text-muted">{o.billingName ?? "—"}</td>
                     <td className="px-4 py-2 text-ink">{formatTL(Number(o.grandTotal))}</td>
-                    <td className="px-4 py-2 text-muted">{o.status}</td>
+                    <td className="px-4 py-2">
+                      <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${ORDER_STATUS_BADGE[o.status]}`}>
+                        {ORDER_STATUS_LABEL[o.status]}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
