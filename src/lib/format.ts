@@ -1,15 +1,13 @@
-const TL = new Intl.NumberFormat("tr-TR", {
-  style: "currency",
-  currency: "TRY",
+const NUM = new Intl.NumberFormat("tr-TR", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
-/** 2490 -> "₺2.490" ; 124.5 -> "₺124,50" */
+/** 2490 -> "2.490 TL" ; 124.5 -> "124,50 TL" */
 export function formatTL(value: number | string): string {
   const n = typeof value === "string" ? Number(value) : value;
-  if (!Number.isFinite(n)) return "₺0";
-  return TL.format(n);
+  if (!Number.isFinite(n)) return "0 TL";
+  return `${NUM.format(n)} TL`;
 }
 
 export function formatDate(d: Date | string): string {
