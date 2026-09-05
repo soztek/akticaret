@@ -14,6 +14,7 @@ export function ProductActions({
     slug: string;
     name: string;
     price: number;
+    vatRate: number;
     unit: string;
     imageUrl: string | null;
     stock: number;
@@ -38,6 +39,7 @@ export function ProductActions({
         slug: product.slug,
         name: product.name,
         price: product.price,
+        vatRate: product.vatRate,
         unit: product.unit,
         imageUrl: product.imageUrl,
       },

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { formatTL, formatDate } from "@/lib/format";
 
@@ -47,7 +48,11 @@ export default async function AdminOrders() {
             <tbody className="divide-y divide-line">
               {orders.map((o) => (
                 <tr key={o.id} className="hover:bg-mist/50">
-                  <td className="px-4 py-2.5 font-medium text-ink">{o.orderNumber}</td>
+                  <td className="px-4 py-2.5 font-medium">
+                    <Link href={`/admin/siparisler/${o.id}`} className="text-navy hover:text-orange hover:underline">
+                      {o.orderNumber}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2.5 text-muted">{o.billingName ?? "—"}</td>
                   <td className="px-4 py-2.5 text-muted">{o.customerType}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 font-semibold text-navy">{formatTL(Number(o.grandTotal))}</td>

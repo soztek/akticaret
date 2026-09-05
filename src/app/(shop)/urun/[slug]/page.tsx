@@ -137,6 +137,7 @@ export default async function ProductPage({
                   slug: p.slug,
                   name: p.name,
                   price: priced.price,
+                  vatRate: p.vatRate,
                   unit: p.unit,
                   imageUrl: p.images[0]?.url ?? null,
                   stock: p.stock,
