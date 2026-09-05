@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { formatTL, formatDate } from "@/lib/format";
+import {
+  ORDER_STATUS_LABEL,
+  ORDER_STATUS_BADGE,
+  PAYMENT_STATUS_LABEL,
+  PAYMENT_STATUS_BADGE,
+  CUSTOMER_TYPE_LABEL,
+} from "@/lib/order-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -54,10 +61,18 @@ export default async function AdminOrders() {
                     </Link>
                   </td>
                   <td className="px-4 py-2.5 text-muted">{o.billingName ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-muted">{o.customerType}</td>
+                  <td className="px-4 py-2.5 text-muted">{CUSTOMER_TYPE_LABEL[o.customerType]}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 font-semibold text-navy">{formatTL(Number(o.grandTotal))}</td>
-                  <td className="px-4 py-2.5 text-muted">{o.status}</td>
-                  <td className="px-4 py-2.5 text-muted">{o.paymentStatus}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${ORDER_STATUS_BADGE[o.status]}`}>
+                      {ORDER_STATUS_LABEL[o.status]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${PAYMENT_STATUS_BADGE[o.paymentStatus]}`}>
+                      {PAYMENT_STATUS_LABEL[o.paymentStatus]}
+                    </span>
+                  </td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted">{formatDate(o.createdAt)}</td>
                 </tr>
               ))}

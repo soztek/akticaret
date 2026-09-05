@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
 import { formatTL, formatDate } from "@/lib/format";
+import { PAYMENT_METHOD_LABEL, PAYMENT_STATUS_LABEL } from "@/lib/order-labels";
 import { StatusControl } from "./status-control";
 
 export const dynamic = "force-dynamic";
@@ -84,8 +85,8 @@ export default async function AdminOrderDetail({
         </div>
         <div className="rounded-xl border border-line bg-paper p-5 text-sm">
           <h3 className="mb-2 font-bold text-ink">Ödeme</h3>
-          <p className="text-ink">{order.paymentMethod}</p>
-          <p className="text-muted">Ödeme durumu: {order.paymentStatus}</p>
+          <p className="text-ink">{PAYMENT_METHOD_LABEL[order.paymentMethod]}</p>
+          <p className="text-muted">Ödeme durumu: {PAYMENT_STATUS_LABEL[order.paymentStatus]}</p>
           {order.note && <p className="mt-2 text-muted">Not: {order.note}</p>}
         </div>
       </div>
