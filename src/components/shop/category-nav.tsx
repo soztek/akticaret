@@ -39,14 +39,8 @@ export function CategoryNav({ categories }: { categories: NavCategory[] }) {
           </div>
         </div>
 
-        {/* Kaydırılabilir orta alan — Ana Sayfa + tüm kategoriler tek satır */}
+        {/* Kaydırılabilir orta alan — tüm kategoriler tek satır */}
         <div className="flex flex-1 items-stretch gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Link
-            href="/"
-            className="shrink-0 whitespace-nowrap px-3 py-3 text-sm font-medium hover:text-orange-light"
-          >
-            Ana Sayfa
-          </Link>
           {categories.map((c) => (
             <Link
               key={c.id}
