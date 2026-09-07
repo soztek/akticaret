@@ -25,7 +25,7 @@ const NAV = [
   { href: "/admin/musteriler", label: "Müşteriler", icon: Users },
   { href: "/admin/teklifler", label: "Teklifler", icon: FileText },
   { href: "/admin/kampanyalar", label: "Kampanyalar", icon: Tag },
-  { href: "/admin/stok", label: "Stok", icon: Boxes },
+  { href: "/admin/stok", label: "Stok / İçe Aktar", icon: Boxes },
   { href: "/admin/ayarlar", label: "Ayarlar", icon: Settings },
 ];
 
