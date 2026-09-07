@@ -39,20 +39,20 @@ export function CategoryNav({ categories }: { categories: NavCategory[] }) {
           </div>
         </div>
 
-        {/* Kaydırılabilir orta alan — tüm kategoriler tek satır */}
-        <div className="flex flex-1 items-stretch gap-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Orta alan — tüm kategoriler; sığmazsa alt satıra kayar (hepsi görünür) */}
+        <div className="flex flex-1 flex-wrap items-center gap-x-1">
           {categories.map((c) => (
             <Link
               key={c.id}
               href={`/kategori/${c.slug}`}
-              className="shrink-0 whitespace-nowrap px-3 py-3 text-sm font-medium hover:text-orange-light"
+              className="whitespace-nowrap px-3 py-3 text-sm font-medium hover:text-orange-light"
             >
               {c.name}
             </Link>
           ))}
         </div>
 
-        {/* Kampanyalar — kaydırma alanının dışında, sağda sabit */}
+        {/* Kampanyalar — sağda sabit */}
         <Link
           href="/kampanyalar"
           className="flex shrink-0 items-center whitespace-nowrap px-3 py-3 text-sm font-bold text-orange-light hover:text-orange"
