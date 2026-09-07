@@ -28,7 +28,7 @@ export function CategoryNav({ categories }: { categories: NavCategory[] }) {
           Ana Sayfa
         </Link>
 
-        {categories.slice(0, 7).map((c) => (
+        {categories.slice(0, 8).map((c) => (
           <div key={c.id} className="group relative">
             <Link
               href={`/kategori/${c.slug}`}
