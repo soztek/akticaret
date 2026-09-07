@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { User, Heart, ShoppingCart } from "lucide-react";
+import { User, UserPlus, Heart, ShoppingCart } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { SearchBar } from "@/components/shop/search-bar";
 import { CategoryNav } from "@/components/shop/category-nav";
@@ -44,6 +44,15 @@ export async function Header() {
                 {user ? "Hesabım" : "Giriş"}
               </span>
             </Link>
+            {!user && (
+              <Link
+                href="/kayit"
+                className="flex flex-col items-center rounded-md px-3 py-1.5 hover:bg-navy-600"
+              >
+                <UserPlus className="h-5 w-5" />
+                <span className="mt-0.5 hidden text-xs sm:block">Üye Ol</span>
+              </Link>
+            )}
             <Link
               href="/hesabim/favoriler"
               className="flex flex-col items-center rounded-md px-3 py-1.5 hover:bg-navy-600"
