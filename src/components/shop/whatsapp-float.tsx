@@ -1,11 +1,12 @@
 import { MessageCircle } from "lucide-react";
+import { getSettings, waNumber } from "@/lib/settings";
 
-const PHONE = process.env.NEXT_PUBLIC_WHATSAPP_PHONE ?? "905385832704";
-
-export function WhatsAppFloat() {
+export async function WhatsAppFloat() {
+  const s = await getSettings();
+  const phone = waNumber(s.whatsapp) || "905385832704";
   return (
     <a
-      href={`https://wa.me/${PHONE}`}
+      href={`https://wa.me/${phone}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp ile iletişime geç"
