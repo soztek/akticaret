@@ -97,8 +97,10 @@ function BulkTab({ cats }: { cats: (Cat & { depth: number })[] }) {
   }
 
   function run(dryRun: boolean) {
-    const num = Number(String(value).replace(",", "."));
-    if (!Number.isFinite(num)) {
+    // %, ₺, TL, boşluk gibi işaretleri temizle ("%2" → 2, "-%5" → -5)
+    const cleaned = String(value).replace(/[^\d.,-]/g, "").replace(",", ".");
+    const num = Number(cleaned);
+    if (cleaned === "" || !Number.isFinite(num)) {
       setReport({ error: "Geçerli bir değer girin." });
       return;
     }
