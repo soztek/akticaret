@@ -37,9 +37,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             >
               <ExternalLink className="h-4 w-4" /> Siteyi Gör
             </Link>
-            <span className="hidden text-muted sm:inline">
+            <Link href="/admin/hesap" className="hidden text-muted hover:text-orange sm:inline">
               {user.name} · {user.role}
-            </span>
+            </Link>
             <form action={logoutAction}>
               <button className="rounded-md border border-line px-3 py-1.5 font-medium text-ink hover:border-danger hover:text-danger">
                 Çıkış

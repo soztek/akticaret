@@ -34,19 +34,24 @@ async function main() {
   console.log(`✔ ${groups.length} müşteri grubu eklendi.`);
 
   // 3) Süper admin
-  const email = (process.env.SUPER_ADMIN_EMAIL ?? "admin@akticaret.com").toLowerCase();
-  const password = process.env.SUPER_ADMIN_PASSWORD ?? "akticaret2026";
-  await db.user.upsert({
-    where: { email },
-    update: { role: "SUPER_ADMIN", isActive: true },
-    create: {
-      email,
-      name: "Süper Admin",
-      passwordHash: await bcrypt.hash(password, 12),
-      role: "SUPER_ADMIN",
-    },
-  });
-  console.log(`✔ Süper admin: ${email} / ${password}`);
+  // Süper admin YOKSA oluştur. Varsa dokunma — böylece panelden değiştirilen
+  // e-posta/şifre her deploy'da eski varsayılana dönmez (güvenlik).
+  const existingAdmin = await db.user.findFirst({ where: { role: "SUPER_ADMIN" } });
+  if (!existingAdmin) {
+    const email = (process.env.SUPER_ADMIN_EMAIL ?? "admin@akticaret.com").toLowerCase();
+    const password = process.env.SUPER_ADMIN_PASSWORD ?? "akticaret2026";
+    await db.user.create({
+      data: {
+        email,
+        name: "Süper Admin",
+        passwordHash: await bcrypt.hash(password, 12),
+        role: "SUPER_ADMIN",
+      },
+    });
+    console.log(`✔ Süper admin oluşturuldu: ${email} / ${password}`);
+  } else {
+    console.log(`✔ Süper admin zaten var (${existingAdmin.email}) — dokunulmadı.`);
+  }
 
   // 4) Site ayarları (tekil satır)
   await db.siteSetting.upsert({
