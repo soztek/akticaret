@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Phone, MessageCircle, MapPin, Clock } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { getSettings, waNumber, telNumber } from "@/lib/settings";
+import { getNavCategories } from "@/lib/catalog";
 
 const KURUMSAL = [
   { label: "Hakkımızda", href: "/hakkimizda" },
@@ -17,14 +18,6 @@ const HIZMET = [
   { label: "Kargo", href: "/kargo" },
   { label: "İade", href: "/iade" },
   { label: "Sıkça Sorulan Sorular", href: "/sss" },
-];
-
-const KATEGORILER = [
-  { label: "Çimento", href: "/kategori/cimento" },
-  { label: "Demir", href: "/kategori/demir" },
-  { label: "Boya", href: "/kategori/boya" },
-  { label: "Hırdavat", href: "/kategori/hirdavat" },
-  { label: "Seramik", href: "/kategori/seramik" },
 ];
 
 function Col({ title, links }: { title: string; links: { label: string; href: string }[] }) {
@@ -45,7 +38,8 @@ function Col({ title, links }: { title: string; links: { label: string; href: st
 }
 
 export async function Footer() {
-  const s = await getSettings();
+  const [s, navCats] = await Promise.all([getSettings(), getNavCategories()]);
+  const kategoriler = navCats.slice(0, 6).map((c) => ({ label: c.name, href: `/kategori/${c.slug}` }));
   return (
     <footer className="mt-12 bg-navy-dark text-paper">
       <div className="container-ak grid grid-cols-2 gap-8 py-12 md:grid-cols-4 lg:grid-cols-5">
@@ -58,7 +52,7 @@ export async function Footer() {
         </div>
         <Col title="Kurumsal" links={KURUMSAL} />
         <Col title="Müşteri Hizmetleri" links={HIZMET} />
-        <Col title="Kategoriler" links={KATEGORILER} />
+        <Col title="Kategoriler" links={kategoriler} />
         <div>
           <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-orange-light">
             İletişim
