@@ -8,6 +8,7 @@ import {
   PAYMENT_STATUS_BADGE,
   CUSTOMER_TYPE_LABEL,
 } from "@/lib/order-labels";
+import { DeleteOrderButton } from "./delete-order-button";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,7 @@ export default async function AdminOrders() {
                 <th className="px-4 py-2.5 font-semibold">Durum</th>
                 <th className="px-4 py-2.5 font-semibold">Ödeme</th>
                 <th className="px-4 py-2.5 font-semibold">Tarih</th>
+                <th className="px-4 py-2.5 font-semibold"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -74,6 +76,9 @@ export default async function AdminOrders() {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted">{formatDate(o.createdAt)}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <DeleteOrderButton orderId={o.id} orderNumber={o.orderNumber} />
+                  </td>
                 </tr>
               ))}
             </tbody>
