@@ -2,6 +2,7 @@ import { Header } from "@/components/shop/header";
 import { Footer } from "@/components/shop/footer";
 import { MobileNav } from "@/components/shop/mobile-nav";
 import { WhatsAppFloat } from "@/components/shop/whatsapp-float";
+import { VisitTracker } from "@/components/shop/visit-tracker";
 
 export default function ShopLayout({ children }: LayoutProps<"/">) {
   return (
@@ -11,6 +12,7 @@ export default function ShopLayout({ children }: LayoutProps<"/">) {
       <Footer />
       <MobileNav />
       <WhatsAppFloat />
+      <VisitTracker />
     </div>
   );
 }

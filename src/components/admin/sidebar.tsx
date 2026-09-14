@@ -15,6 +15,7 @@ import {
   Settings,
   Boxes,
   Percent,
+  Eye,
 } from "lucide-react";
 
 const NAV = [
@@ -28,6 +29,7 @@ const NAV = [
   { href: "/admin/kampanyalar", label: "Kampanyalar", icon: Tag },
   { href: "/admin/stok", label: "Stok / İçe Aktar", icon: Boxes },
   { href: "/admin/fiyatlar", label: "Fiyat Yönetimi", icon: Percent },
+  { href: "/admin/ziyaretci", label: "Ziyaretçiler", icon: Eye },
   { href: "/admin/ayarlar", label: "Ayarlar", icon: Settings },
 ];
 
