@@ -1019,18 +1019,6 @@ model AuditLog {
   @@index([entityType, entityId])
 }
 
-/// Basit ziyaret kaydı (her public sayfa görüntülemede /api/track).
-model Visit {
-  id        String   @id @default(cuid())
-  ip        String
-  path      String
-  ua        String?  @db.Text
-  createdAt DateTime @default(now())
-
-  @@index([ip])
-  @@index([createdAt])
-}
-
 /// Tekil ayar satırı (id = "main") + esnek JSON.
 model SiteSetting {
   id                String   @id @default("main")
