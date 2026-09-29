@@ -43,7 +43,7 @@ export function Logo({
       aria-label="AK TİCARET ana sayfa"
     >
       {variant === "boxed" ? (
-        <span className="rounded-lg bg-paper px-3 py-1.5">{img}</span>
+        <span className="rounded-lg bg-gradient-to-br from-[#eef1f6] to-[#d9dfe8] px-3 py-1.5">{img}</span>
       ) : (
         img
       )}
