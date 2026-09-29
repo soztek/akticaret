@@ -3,9 +3,9 @@ import Link from "next/link";
 import { clsx } from "clsx";
 
 /**
- * AK TİCARET logosu. Mevcut kurumsal logo (siyah "A" ev amblemi + mavi detay,
- * "AK TİCARET / Yapı Malzemeleri"). Logo koyu renk olduğundan koyu lacivert
- * zeminde beyaz kutu içinde gösterilir (variant="boxed").
+ * AK GRUP YAPI logosu ("A" ev amblemi + mavi detay, "AK GRUP YAPI LTD. ŞTİ.").
+ * Logo koyu renk + beyaz zeminli olduğundan koyu lacivert zeminde beyaz kutu
+ * içinde gösterilir (variant="boxed").
  */
 export function Logo({
   variant = "plain",
@@ -20,7 +20,7 @@ export function Logo({
   if (variant === "mark") {
     return (
       <Link href="/" className={clsx("inline-flex", className)} aria-label="AK TİCARET ana sayfa">
-        <Image src="/logo-mark.png" alt="AK TİCARET" width={44} height={44} priority={priority} />
+        <Image src="/logo-mark.png" alt="AK GRUP YAPI" width={44} height={44} priority={priority} />
       </Link>
     );
   }
@@ -28,9 +28,9 @@ export function Logo({
   const img = (
     <Image
       src="/logo.png"
-      alt="AK TİCARET Yapı Malzemeleri"
-      width={200}
-      height={53}
+      alt="AK GRUP YAPI"
+      width={900}
+      height={301}
       priority={priority}
       className="h-10 w-auto sm:h-11"
     />
