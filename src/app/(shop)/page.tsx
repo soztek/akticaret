@@ -43,7 +43,7 @@ export default async function HomePage() {
         ],
       },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-      take: 6,
+      take: 24,
       include: { product: { select: { slug: true } } },
     }),
   ]);

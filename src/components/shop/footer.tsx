@@ -44,7 +44,7 @@ export async function Footer() {
     <footer className="mt-12 bg-navy-dark text-paper">
       <div className="container-ak grid grid-cols-2 gap-8 py-12 md:grid-cols-4 lg:grid-cols-5">
         <div className="col-span-2 lg:col-span-1">
-          <Logo variant="boxed" />
+          <Logo variant="boxed" block />
           <p className="mt-4 text-sm text-mist/70">
             {s.data.aboutShort ||
               "Yapı ve hırdavatta profesyonel çözümler. Kaliteli ürünler, uygun fiyatlar ve profesyonel hizmet."}

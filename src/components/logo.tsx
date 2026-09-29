@@ -11,15 +11,18 @@ export function Logo({
   variant = "plain",
   className,
   priority,
+  block = false,
 }: {
-  /** "plain": açık zeminde düz | "boxed": koyu zeminde beyaz kutu | "mark": sadece amblem */
+  /** "plain": açık zeminde düz | "boxed": koyu zeminde degrade kutu | "mark": sadece amblem */
   variant?: "plain" | "boxed" | "mark";
   className?: string;
   priority?: boolean;
+  /** true: kutu bulunduğu alanın tam genişliğini kaplar (ör. footer, altındaki metinle hizalı) */
+  block?: boolean;
 }) {
   if (variant === "mark") {
     return (
-      <Link href="/" className={clsx("inline-flex", className)} aria-label="AK TİCARET ana sayfa">
+      <Link href="/" className={clsx("inline-flex", className)} aria-label="AK GRUP YAPI ana sayfa">
         <Image src="/logo-mark.png" alt="AK GRUP YAPI" width={44} height={44} priority={priority} />
       </Link>
     );
@@ -39,11 +42,18 @@ export function Logo({
   return (
     <Link
       href="/"
-      className={clsx("inline-flex items-center", className)}
-      aria-label="AK TİCARET ana sayfa"
+      className={clsx(block ? "flex w-full" : "inline-flex items-center", className)}
+      aria-label="AK GRUP YAPI ana sayfa"
     >
       {variant === "boxed" ? (
-        <span className="rounded-lg bg-gradient-to-br from-[#eef1f6] to-[#d9dfe8] px-3 py-1.5">{img}</span>
+        <span
+          className={clsx(
+            "rounded-lg bg-gradient-to-br from-[#eef1f6] to-[#d9dfe8] px-3 py-2",
+            block && "flex w-full items-center justify-center",
+          )}
+        >
+          {img}
+        </span>
       ) : (
         img
       )}

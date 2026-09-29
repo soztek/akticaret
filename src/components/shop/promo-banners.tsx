@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Percent, Tag, ArrowRight } from "lucide-react";
 import { formatTL, discountPercent, formatBadge } from "@/lib/format";
@@ -13,10 +16,21 @@ export type PromoCampaignCard = {
   imageUrl: string | null;
 };
 
-/** Ana sayfa kampanya banner şeridi — admin'de yayınlanan kampanyalardan beslenir. */
+const VISIBLE = 3; // her zaman 3 kampanya
+const INTERVAL = 5000; // 5 sn'de bir sırayla döner
+
+/** Ana sayfa kampanya şeridi — her zaman 3 kampanya; 3'ten fazlaysa sırayla döner. */
 export function PromoBanners({ campaigns }: { campaigns: PromoCampaignCard[] }) {
-  // Yayında kampanya yoksa: tek "Kampanyaları Keşfet" bandı
-  if (campaigns.length === 0) {
+  const total = campaigns.length;
+  const [start, setStart] = useState(0);
+
+  useEffect(() => {
+    if (total <= VISIBLE) return; // dönmeye gerek yok
+    const t = setInterval(() => setStart((s) => (s + VISIBLE) % total), INTERVAL);
+    return () => clearInterval(t);
+  }, [total]);
+
+  if (total === 0) {
     return (
       <Link
         href="/kampanyalar"
@@ -33,9 +47,13 @@ export function PromoBanners({ campaigns }: { campaigns: PromoCampaignCard[] }) 
     );
   }
 
+  // Görünen 3'lü pencere (baştan sarmalı)
+  const count = Math.min(VISIBLE, total);
+  const visible = Array.from({ length: count }, (_, i) => campaigns[(start + i) % total]);
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {campaigns.slice(0, 6).map((c) => {
+    <div key={start} className="grid animate-[fadeIn_0.5s_ease] gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {visible.map((c) => {
         const href = c.productSlug ? `/urun/${c.productSlug}` : `/kampanyalar/${c.slug}`;
         const disc =
           c.price != null && c.compareAtPrice != null
