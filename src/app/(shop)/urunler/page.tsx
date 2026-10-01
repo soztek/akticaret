@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/product-card";
 import { Breadcrumb } from "@/components/shop/breadcrumb";
 import { getAllProducts, type SortKey } from "@/lib/catalog";
 import { getPriceView } from "@/lib/pricing-server";
+import { PerPageSelect } from "./per-page-select";
 
 export const dynamic = "force-dynamic";
 
@@ -76,23 +77,8 @@ export default async function AllProductsPage({
             ))}
           </div>
 
-          {/* Sayfa başına göster */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm text-muted">Göster:</span>
-            {PER_PAGE_OPTIONS.map((n) => (
-              <Link
-                key={n}
-                href={pageHref(1, sort, n)}
-                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
-                  per === n
-                    ? "border-orange bg-orange/10 text-orange"
-                    : "border-line text-navy hover:border-orange"
-                }`}
-              >
-                {n}
-              </Link>
-            ))}
-          </div>
+          {/* Sayfa başına göster (açılır kutu) */}
+          <PerPageSelect options={PER_PAGE_OPTIONS} value={per} sort={sort} />
         </div>
       </div>
 
