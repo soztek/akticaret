@@ -212,7 +212,7 @@ export async function getAllProducts(opts: {
   sort?: SortKey;
 }): Promise<{ products: ProductCardData[]; total: number; page: number; pageSize: number; totalPages: number }> {
   const page = Math.max(1, opts.page ?? 1);
-  const pageSize = Math.min(120, Math.max(1, opts.pageSize ?? 48));
+  const pageSize = Math.min(200, Math.max(1, opts.pageSize ?? 50));
   const where: Prisma.ProductWhereInput = { isActive: true };
 
   const orderBy: Prisma.ProductOrderByWithRelationInput =

@@ -20,9 +20,13 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "popular", label: "Çok Görüntülenen" },
 ];
 
-function pageHref(page: number, sort: SortKey) {
+const PER_PAGE_OPTIONS = [50, 100, 150, 200];
+const DEFAULT_PER = 50;
+
+function pageHref(page: number, sort: SortKey, per: number) {
   const p = new URLSearchParams();
   if (sort !== "new") p.set("sirala", sort);
+  if (per !== DEFAULT_PER) p.set("goster", String(per));
   if (page > 1) p.set("sayfa", String(page));
   const qs = p.toString();
   return qs ? `/urunler?${qs}` : "/urunler";
@@ -37,9 +41,11 @@ export default async function AllProductsPage({
   const asStr = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const sort = (asStr(sp.sirala) as SortKey) ?? "new";
   const page = Math.max(1, Number(asStr(sp.sayfa) ?? "1") || 1);
+  const perRaw = Number(asStr(sp.goster) ?? String(DEFAULT_PER));
+  const per = PER_PAGE_OPTIONS.includes(perRaw) ? perRaw : DEFAULT_PER;
 
   const [{ products, total, totalPages, page: current }, view] = await Promise.all([
-    getAllProducts({ page, sort }),
+    getAllProducts({ page, sort, pageSize: per }),
     getPriceView(),
   ]);
 
@@ -52,21 +58,41 @@ export default async function AllProductsPage({
           <h1 className="text-2xl font-bold text-ink">Tüm Ürünler</h1>
           <p className="text-sm text-muted">{total.toLocaleString("tr-TR")} ürün</p>
         </div>
-        {/* Sıralama */}
-        <div className="flex flex-wrap gap-1.5">
-          {SORTS.map((s) => (
-            <Link
-              key={s.key}
-              href={pageHref(1, s.key)}
-              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
-                sort === s.key
-                  ? "border-orange bg-orange/10 text-orange"
-                  : "border-line text-navy hover:border-orange"
-              }`}
-            >
-              {s.label}
-            </Link>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Sıralama */}
+          <div className="flex flex-wrap gap-1.5">
+            {SORTS.map((s) => (
+              <Link
+                key={s.key}
+                href={pageHref(1, s.key, per)}
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                  sort === s.key
+                    ? "border-orange bg-orange/10 text-orange"
+                    : "border-line text-navy hover:border-orange"
+                }`}
+              >
+                {s.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Sayfa başına göster */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm text-muted">Göster:</span>
+            {PER_PAGE_OPTIONS.map((n) => (
+              <Link
+                key={n}
+                href={pageHref(1, sort, n)}
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                  per === n
+                    ? "border-orange bg-orange/10 text-orange"
+                    : "border-line text-navy hover:border-orange"
+                }`}
+              >
+                {n}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -86,7 +112,7 @@ export default async function AllProductsPage({
           {totalPages > 1 && (
             <nav className="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Sayfalama">
               {current > 1 && (
-                <Link href={pageHref(current - 1, sort)} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-navy hover:border-orange">
+                <Link href={pageHref(current - 1, sort, per)} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-navy hover:border-orange">
                   ‹ Önceki
                 </Link>
               )}
@@ -96,7 +122,7 @@ export default async function AllProductsPage({
                 ) : (
                   <Link
                     key={n}
-                    href={pageHref(n as number, sort)}
+                    href={pageHref(n as number, sort, per)}
                     className={`min-w-10 rounded-lg border px-3 py-2 text-center text-sm font-medium transition ${
                       n === current ? "border-orange bg-orange text-white" : "border-line text-navy hover:border-orange"
                     }`}
@@ -106,7 +132,7 @@ export default async function AllProductsPage({
                 ),
               )}
               {current < totalPages && (
-                <Link href={pageHref(current + 1, sort)} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-navy hover:border-orange">
+                <Link href={pageHref(current + 1, sort, per)} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-navy hover:border-orange">
                   Sonraki ›
                 </Link>
               )}
