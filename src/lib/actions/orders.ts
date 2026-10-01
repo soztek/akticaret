@@ -37,8 +37,8 @@ export async function createOrderAction(input: CreateOrderInput): Promise<Create
 
   const [user, view] = await Promise.all([getCurrentUser(), getPriceView()]);
 
-  if (input.paymentMethod === "ACCOUNT" && !view.isDealer) {
-    return { ok: false, error: "Cari hesap ile ödeme yalnızca onaylı bayilere açıktır." };
+  if (input.paymentMethod === "ACCOUNT" && !view.canUseAccount) {
+    return { ok: false, error: "Cari hesap (vadeli) ile ödeme yalnızca vadeli çalışan onaylı bayilere açıktır." };
   }
 
   // Ürünleri getir, fiyatı SUNUCUDA yeniden hesapla

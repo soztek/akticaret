@@ -3,10 +3,11 @@
 
 export type PriceView = {
   isDealer: boolean;
-  groupDiscount: number; // yüzde
+  discount: number; // bayiye özel iskonto yüzdesi
+  canUseAccount: boolean; // vadeli (cari hesap) ile ödeyebilir mi
 };
 
-export const GUEST_VIEW: PriceView = { isDealer: false, groupDiscount: 0 };
+export const GUEST_VIEW: PriceView = { isDealer: false, discount: 0, canUseAccount: false };
 
 export type PricedProduct = {
   b2cPrice: number;
@@ -26,7 +27,7 @@ const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 export function resolvePrice(p: PricedProduct, view: PriceView): ResolvedPrice {
   if (view.isDealer) {
     const base = p.b2bPrice ?? p.b2cPrice;
-    const price = view.groupDiscount > 0 ? round2(base * (1 - view.groupDiscount / 100)) : base;
+    const price = view.discount > 0 ? round2(base * (1 - view.discount / 100)) : base;
     return {
       price,
       compareAt: p.b2cPrice > price ? p.b2cPrice : null,

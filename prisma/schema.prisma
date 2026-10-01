@@ -144,6 +144,12 @@ enum CompanyType {
   DIGER
 }
 
+/// Bayi ödeme şekli (onayda belirlenir). VADELI → cari hesap kullanabilir.
+enum DealerPaymentTerm {
+  PESIN
+  VADELI
+}
+
 /// Bayi başvurusu + onaylı bayi kaydı (firma bilgileri burada tutulur)
 model B2BCustomer {
   id                String         @id @default(cuid())
@@ -163,6 +169,8 @@ model B2BCustomer {
   status            B2BStatus      @default(PENDING)
   customerGroupId   String?
   customerGroup     CustomerGroup? @relation(fields: [customerGroupId], references: [id])
+  discountPercent   Decimal           @default(0) @db.Decimal(5, 2) // onayda belirlenen bayiye özel iskonto
+  paymentTerm       DealerPaymentTerm @default(PESIN) // peşin / vadeli (cari)
   approvedAt        DateTime?
   approvedById      String?
   notes             String?

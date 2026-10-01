@@ -17,21 +17,24 @@ async function main() {
   }
   console.log(`✔ ${PERMISSION_CATALOG.length} yetki eklendi.`);
 
-  // 2) Müşteri grupları (B2B fiyatlandırma)
+  // 2) Bayi grupları (kategori/etiket). İskonto artık bayiye özel, onayda belirlenir.
   const groups = [
-    { name: "Standart", slug: "standart", discountPercent: 0, sortOrder: 0 },
-    { name: "Silver", slug: "silver", discountPercent: 5, sortOrder: 1 },
-    { name: "Gold", slug: "gold", discountPercent: 10, sortOrder: 2 },
-    { name: "Platinum", slug: "platinum", discountPercent: 15, sortOrder: 3 },
+    { name: "Standart", slug: "standart", sortOrder: 0 },
+    { name: "Toptan Bayi", slug: "toptan-bayi", sortOrder: 1 },
   ];
   for (const g of groups) {
     await db.customerGroup.upsert({
       where: { slug: g.slug },
-      update: { name: g.name, discountPercent: g.discountPercent, sortOrder: g.sortOrder },
-      create: g,
+      update: { name: g.name, sortOrder: g.sortOrder, isActive: true },
+      create: { ...g, discountPercent: 0 },
     });
   }
-  console.log(`✔ ${groups.length} müşteri grubu eklendi.`);
+  // Eski kademeler (Silver/Gold/Platinum) artık kullanılmıyor → pasifleştir.
+  await db.customerGroup.updateMany({
+    where: { slug: { in: ["silver", "gold", "platinum"] } },
+    data: { isActive: false },
+  });
+  console.log(`✔ ${groups.length} bayi grubu (Standart, Toptan Bayi).`);
 
   // 3) Süper admin
   // Süper admin YOKSA oluştur. Varsa dokunma — böylece panelden değiştirilen

@@ -10,11 +10,12 @@ export const getPriceView = cache(async (): Promise<PriceView> => {
   if (!user || user.role !== "B2B_CUSTOMER") return GUEST_VIEW;
   const b2b = await db.b2BCustomer.findUnique({
     where: { userId: user.id },
-    include: { customerGroup: true },
+    select: { status: true, discountPercent: true, paymentTerm: true },
   });
   if (!b2b || b2b.status !== "APPROVED") return GUEST_VIEW;
   return {
     isDealer: true,
-    groupDiscount: Number(b2b.customerGroup?.discountPercent ?? 0),
+    discount: Number(b2b.discountPercent ?? 0),
+    canUseAccount: b2b.paymentTerm === "VADELI",
   };
 });

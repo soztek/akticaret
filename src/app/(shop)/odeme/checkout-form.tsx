@@ -13,10 +13,12 @@ type Method = "BANK_TRANSFER" | "CARD" | "ACCOUNT";
 
 export function CheckoutForm({
   isDealer,
+  canUseAccount = false,
   loggedIn,
   defaults,
 }: {
   isDealer: boolean;
+  canUseAccount?: boolean;
   loggedIn: boolean;
   defaults: { name: string; phone: string; city: string; district: string; address: string };
 }) {
@@ -92,7 +94,7 @@ export function CheckoutForm({
   const methods: { id: Method; label: string; desc: string; icon: React.ElementType; show: boolean }[] = [
     { id: "BANK_TRANSFER", label: "Havale / EFT", desc: "Sipariş sonrası banka bilgileri gösterilir.", icon: Landmark, show: true },
     { id: "CARD", label: "Kredi Kartı", desc: "Online kart ödemesi (yakında).", icon: CreditCard, show: true },
-    { id: "ACCOUNT", label: "Cari Hesap (Vadeli)", desc: "Bayi cari hesabınıza işlenir.", icon: Wallet, show: isDealer },
+    { id: "ACCOUNT", label: "Cari Hesap (Vadeli)", desc: "Bayi cari hesabınıza işlenir.", icon: Wallet, show: canUseAccount },
   ];
 
   return (

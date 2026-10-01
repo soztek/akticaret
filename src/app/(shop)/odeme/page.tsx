@@ -25,6 +25,7 @@ export default async function CheckoutPage() {
       <h1 className="mb-6 text-2xl font-bold text-ink">Ödeme</h1>
       <CheckoutForm
         isDealer={view.isDealer}
+        canUseAccount={view.canUseAccount}
         loggedIn={!!user}
         defaults={{
           name: defaultAddress?.fullName ?? user?.name ?? "",

@@ -17,7 +17,7 @@ export default async function AdminDealers() {
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       include: { user: { select: { email: true } }, customerGroup: { select: { name: true } } },
     }),
-    db.customerGroup.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true } }),
+    db.customerGroup.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" }, select: { id: true, name: true } }),
     db.b2BCustomer.count({ where: { status: "PENDING" } }),
   ]);
 
@@ -63,7 +63,17 @@ export default async function AdminDealers() {
                     <p>{d.phone}</p>
                     <p className="text-xs">{d.user.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-muted">{d.customerGroup?.name ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted">
+                    {d.status === "APPROVED" ? (
+                      <div className="text-xs">
+                        <p className="font-medium text-ink">{d.customerGroup?.name ?? "—"}</p>
+                        <p>İskonto: %{Number(d.discountPercent)}</p>
+                        <p>{d.paymentTerm === "VADELI" ? "Vadeli (Cari)" : "Peşin"}</p>
+                      </div>
+                    ) : (
+                      d.customerGroup?.name ?? "—"
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS[d.status]?.cls}`}>
                       {STATUS[d.status]?.label}
@@ -76,6 +86,8 @@ export default async function AdminDealers() {
                       status={d.status}
                       groups={groups}
                       currentGroupId={d.customerGroupId}
+                      currentDiscount={Number(d.discountPercent)}
+                      currentTerm={d.paymentTerm}
                     />
                   </td>
                 </tr>
