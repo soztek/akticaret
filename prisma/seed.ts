@@ -37,23 +37,37 @@ async function main() {
   console.log(`✔ ${groups.length} bayi grubu (Standart, Toptan Bayi).`);
 
   // 3) Süper admin
-  // Süper admin YOKSA oluştur. Varsa dokunma — böylece panelden değiştirilen
-  // e-posta/şifre her deploy'da eski varsayılana dönmez (güvenlik).
-  const existingAdmin = await db.user.findFirst({ where: { role: "SUPER_ADMIN" } });
-  if (!existingAdmin) {
-    const email = (process.env.SUPER_ADMIN_EMAIL ?? "admin@akticaret.com").toLowerCase();
-    const password = process.env.SUPER_ADMIN_PASSWORD ?? "akticaret2026";
-    await db.user.create({
-      data: {
-        email,
-        name: "Süper Admin",
-        passwordHash: await bcrypt.hash(password, 12),
-        role: "SUPER_ADMIN",
-      },
-    });
-    console.log(`✔ Süper admin oluşturuldu: ${email} / ${password}`);
+  // SUPER_ADMIN_EMAIL env'i varsa: o e-postadaki kullanıcı
+  //   - varsa → SUPER_ADMIN'e YÜKSELT (şifreye dokunma),
+  //   - yoksa → yeni süper admin oluştur (SUPER_ADMIN_PASSWORD ile).
+  // Env yoksa ve hiç süper admin yoksa → varsayılanı oluştur. Varsa dokunma.
+  const envEmail = process.env.SUPER_ADMIN_EMAIL?.toLowerCase();
+  if (envEmail) {
+    const user = await db.user.findUnique({ where: { email: envEmail } });
+    if (user) {
+      if (user.role !== "SUPER_ADMIN" || !user.isActive) {
+        await db.user.update({ where: { id: user.id }, data: { role: "SUPER_ADMIN", isActive: true } });
+        console.log(`✔ Süper admine yükseltildi: ${envEmail} (şifre değişmedi).`);
+      } else {
+        console.log(`✔ Süper admin zaten: ${envEmail} — dokunulmadı.`);
+      }
+    } else {
+      const password = process.env.SUPER_ADMIN_PASSWORD ?? "akticaret2026";
+      await db.user.create({
+        data: { email: envEmail, name: "Süper Admin", passwordHash: await bcrypt.hash(password, 12), role: "SUPER_ADMIN" },
+      });
+      console.log(`✔ Süper admin oluşturuldu: ${envEmail} / ${password}`);
+    }
   } else {
-    console.log(`✔ Süper admin zaten var (${existingAdmin.email}) — dokunulmadı.`);
+    const existingAdmin = await db.user.findFirst({ where: { role: "SUPER_ADMIN" } });
+    if (!existingAdmin) {
+      await db.user.create({
+        data: { email: "admin@akticaret.com", name: "Süper Admin", passwordHash: await bcrypt.hash("akticaret2026", 12), role: "SUPER_ADMIN" },
+      });
+      console.log(`✔ Süper admin oluşturuldu: admin@akticaret.com / akticaret2026`);
+    } else {
+      console.log(`✔ Süper admin zaten var (${existingAdmin.email}) — dokunulmadı.`);
+    }
   }
 
   // 4) Site ayarları (tekil satır)
