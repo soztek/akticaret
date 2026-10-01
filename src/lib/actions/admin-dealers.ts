@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma, type DealerPaymentTerm } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
-import { PERMISSIONS } from "@/lib/rbac";
+import { PERMISSIONS, isStaffRole } from "@/lib/rbac";
 
 export type ApproveDealerInput = {
   customerGroupId: string | null;
@@ -20,7 +20,10 @@ export async function approveDealer(b2bId: string, input: ApproveDealerInput) {
   const admin = await requirePermission(PERMISSIONS.DEALERS_WRITE).catch(() => null);
   if (!admin) return { error: "Yetkiniz yok." };
 
-  const b2b = await db.b2BCustomer.findUnique({ where: { id: b2bId } });
+  const b2b = await db.b2BCustomer.findUnique({
+    where: { id: b2bId },
+    include: { user: { select: { id: true, role: true } } },
+  });
   if (!b2b) return { error: "Başvuru bulunamadı." };
 
   const pct = Number(input.discountPercent);
@@ -29,7 +32,7 @@ export async function approveDealer(b2bId: string, input: ApproveDealerInput) {
   }
   const term: DealerPaymentTerm = input.paymentTerm === "VADELI" ? "VADELI" : "PESIN";
 
-  await db.$transaction([
+  const ops: Prisma.PrismaPromise<unknown>[] = [
     db.b2BCustomer.update({
       where: { id: b2bId },
       data: {
@@ -41,7 +44,6 @@ export async function approveDealer(b2bId: string, input: ApproveDealerInput) {
         paymentTerm: term,
       },
     }),
-    db.user.update({ where: { id: b2b.userId }, data: { role: "B2B_CUSTOMER" } }),
     db.auditLog.create({
       data: {
         userId: admin.id,
@@ -52,7 +54,12 @@ export async function approveDealer(b2bId: string, input: ApproveDealerInput) {
         newValue: { group: input.customerGroupId, discountPercent: pct, paymentTerm: term } as Prisma.InputJsonValue,
       },
     }),
-  ]);
+  ];
+  // Personel (admin vb.) rolünü ASLA değiştirme; yalnızca müşteri rolünü yükselt.
+  if (!isStaffRole(b2b.user.role)) {
+    ops.push(db.user.update({ where: { id: b2b.user.id }, data: { role: "B2B_CUSTOMER" } }));
+  }
+  await db.$transaction(ops);
   revalidatePath("/admin/bayiler");
   return { ok: true };
 }
@@ -64,7 +71,8 @@ export async function rejectDealer(b2bId: string) {
   if (!b2b) return;
   await db.$transaction([
     db.b2BCustomer.update({ where: { id: b2bId }, data: { status: "REJECTED" } }),
-    db.user.update({ where: { id: b2b.userId }, data: { role: "B2C_CUSTOMER" } }),
+    // Yalnızca bayi rolündeyse düşür; personel (admin) rolüne dokunma.
+    db.user.updateMany({ where: { id: b2b.userId, role: "B2B_CUSTOMER" }, data: { role: "B2C_CUSTOMER" } }),
   ]);
   revalidatePath("/admin/bayiler");
 }
@@ -109,7 +117,7 @@ export async function suspendDealer(b2bId: string) {
   if (!b2b) return;
   await db.$transaction([
     db.b2BCustomer.update({ where: { id: b2bId }, data: { status: "SUSPENDED" } }),
-    db.user.update({ where: { id: b2b.userId }, data: { role: "B2C_CUSTOMER" } }),
+    db.user.updateMany({ where: { id: b2b.userId, role: "B2B_CUSTOMER" }, data: { role: "B2C_CUSTOMER" } }),
   ]);
   revalidatePath("/admin/bayiler");
 }

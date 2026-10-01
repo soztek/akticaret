@@ -1,5 +1,8 @@
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/format";
+import { getCurrentUser } from "@/lib/auth";
+import { isStaffRole } from "@/lib/rbac";
+import { CustomerDeleteButton } from "./customer-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +15,7 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 export default async function AdminCustomers() {
+  const me = await getCurrentUser();
   const users = await db.user.findMany({
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -44,6 +48,7 @@ export default async function AdminCustomers() {
               <th className="px-4 py-2.5 font-semibold">Rol</th>
               <th className="px-4 py-2.5 font-semibold">Sipariş</th>
               <th className="px-4 py-2.5 font-semibold">Kayıt</th>
+              <th className="px-4 py-2.5 font-semibold">İşlem</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -59,6 +64,14 @@ export default async function AdminCustomers() {
                 </td>
                 <td className="px-4 py-2.5 text-muted">{u._count.orders}</td>
                 <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted">{formatDate(u.createdAt)}</td>
+                <td className="px-4 py-2.5">
+                  <CustomerDeleteButton
+                    userId={u.id}
+                    name={u.name}
+                    isStaff={isStaffRole(u.role)}
+                    isSelf={me?.id === u.id}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
