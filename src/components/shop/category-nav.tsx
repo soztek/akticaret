@@ -24,8 +24,8 @@ export function CategoryNav({ categories }: { categories: NavCategory[] }) {
           </div>
         </div>
 
-        <Link href="/" className="px-3 py-3 text-sm font-medium hover:text-orange-light">
-          Ana Sayfa
+        <Link href="/urunler" className="px-3 py-3 text-sm font-medium hover:text-orange-light">
+          Tüm Ürünler
         </Link>
 
         {categories.slice(0, 8).map((c) => (

@@ -205,6 +205,45 @@ export async function getCategoryProducts(opts: {
   return rows.map(toCard);
 }
 
+/** Tüm aktif ürünler — sayfalamalı (Tüm Ürünler sayfası). */
+export async function getAllProducts(opts: {
+  page?: number;
+  pageSize?: number;
+  sort?: SortKey;
+}): Promise<{ products: ProductCardData[]; total: number; page: number; pageSize: number; totalPages: number }> {
+  const page = Math.max(1, opts.page ?? 1);
+  const pageSize = Math.min(120, Math.max(1, opts.pageSize ?? 48));
+  const where: Prisma.ProductWhereInput = { isActive: true };
+
+  const orderBy: Prisma.ProductOrderByWithRelationInput =
+    opts.sort === "price-asc"
+      ? { b2cPrice: "asc" }
+      : opts.sort === "price-desc"
+        ? { b2cPrice: "desc" }
+        : opts.sort === "popular"
+          ? { viewCount: "desc" }
+          : { createdAt: "desc" };
+
+  const [rows, total] = await Promise.all([
+    db.product.findMany({
+      where,
+      orderBy,
+      select: productCardSelect,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    db.product.count({ where }),
+  ]);
+
+  return {
+    products: rows.map(toCard),
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  };
+}
+
 /** Bir kategorideki (alt kategoriler dahil) markalar — filtre için. */
 export async function getCategoryBrands(categoryIds: string[]) {
   const rows = await db.product.findMany({
