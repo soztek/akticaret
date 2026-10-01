@@ -69,6 +69,39 @@ export async function rejectDealer(b2bId: string) {
   revalidatePath("/admin/bayiler");
 }
 
+/** Bayi başvurusunu/kaydını tamamen sil. Kullanıcı hesabı KALIR; yalnızca bayi
+ *  kaydı silinir. Kullanıcı bayi rolündeyse B2C'ye düşürülür (personel rolüne dokunulmaz). */
+export async function deleteDealer(b2bId: string): Promise<{ ok?: boolean; error?: string }> {
+  const admin = await requirePermission(PERMISSIONS.DEALERS_WRITE).catch(() => null);
+  if (!admin) return { error: "Yetkiniz yok." };
+
+  const b2b = await db.b2BCustomer.findUnique({
+    where: { id: b2bId },
+    include: { user: { select: { id: true, role: true } } },
+  });
+  if (!b2b) return { error: "Kayıt bulunamadı." };
+
+  await db.$transaction(async (tx) => {
+    await tx.b2BCustomer.delete({ where: { id: b2bId } });
+    // Sadece bayi rolündeyse düşür; admin/personel rollerine dokunma.
+    if (b2b.user.role === "B2B_CUSTOMER") {
+      await tx.user.update({ where: { id: b2b.user.id }, data: { role: "B2C_CUSTOMER" } });
+    }
+    await tx.auditLog.create({
+      data: {
+        userId: admin.id,
+        actorName: admin.name,
+        action: "dealer.delete",
+        entityType: "B2BCustomer",
+        entityId: b2bId,
+        newValue: { companyName: b2b.companyName } as Prisma.InputJsonValue,
+      },
+    });
+  });
+  revalidatePath("/admin/bayiler");
+  return { ok: true };
+}
+
 export async function suspendDealer(b2bId: string) {
   const admin = await requirePermission(PERMISSIONS.DEALERS_WRITE).catch(() => null);
   if (!admin) return;

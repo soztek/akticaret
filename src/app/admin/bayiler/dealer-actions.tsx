@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { approveDealer, rejectDealer, suspendDealer } from "@/lib/actions/admin-dealers";
+import { approveDealer, rejectDealer, suspendDealer, deleteDealer } from "@/lib/actions/admin-dealers";
 
 type Term = "PESIN" | "VADELI";
 
@@ -39,16 +39,38 @@ export function DealerActions({
     });
   }
 
+  function doDelete() {
+    if (!confirm("Bu bayi kaydı kalıcı olarak silinecek (kullanıcı hesabı kalır). Devam edilsin mi?")) return;
+    start(async () => {
+      const res = await deleteDealer(b2bId);
+      if (res?.error) setErr(res.error);
+    });
+  }
+
+  const DeleteBtn = (
+    <button
+      disabled={pending}
+      onClick={doDelete}
+      className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-muted hover:border-danger hover:text-danger disabled:opacity-50"
+    >
+      Sil
+    </button>
+  );
+
   // Onaylı bayi → sadece askıya alma
   if (status === "APPROVED") {
     return (
-      <button
-        disabled={pending}
-        onClick={() => start(() => suspendDealer(b2bId))}
-        className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-muted hover:border-danger hover:text-danger disabled:opacity-50"
-      >
-        Askıya Al
-      </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          disabled={pending}
+          onClick={() => start(() => suspendDealer(b2bId))}
+          className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-muted hover:border-danger hover:text-danger disabled:opacity-50"
+        >
+          Askıya Al
+        </button>
+        {DeleteBtn}
+        {err && <span className="text-xs font-medium text-danger">{err}</span>}
+      </div>
     );
   }
 
@@ -106,6 +128,7 @@ export function DealerActions({
             Reddet
           </button>
         )}
+        {DeleteBtn}
         {err && <span className="text-xs font-medium text-danger">{err}</span>}
       </div>
     </div>
