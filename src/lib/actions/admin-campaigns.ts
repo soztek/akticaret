@@ -1,5 +1,6 @@
 "use server";
 
+import { invalidateCatalog } from "@/lib/cached";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
@@ -52,6 +53,7 @@ export async function saveCampaign(input: CampaignInput): Promise<CampaignResult
 
   if (input.id) {
     await db.promoCampaign.update({ where: { id: input.id }, data });
+    invalidateCatalog();
     revalidatePath("/admin/kampanyalar");
     revalidatePath("/kampanyalar");
     return { ok: true };
@@ -65,6 +67,7 @@ export async function saveCampaign(input: CampaignInput): Promise<CampaignResult
       ),
     },
   });
+  invalidateCatalog();
   revalidatePath("/admin/kampanyalar");
   revalidatePath("/kampanyalar");
   redirect(`/admin/kampanyalar/${created.id}`);
@@ -73,6 +76,7 @@ export async function saveCampaign(input: CampaignInput): Promise<CampaignResult
 export async function togglePublish(id: string, next: boolean) {
   if (!(await guard())) return;
   await db.promoCampaign.update({ where: { id }, data: { isPublished: next } });
+  invalidateCatalog();
   revalidatePath("/admin/kampanyalar");
   revalidatePath("/kampanyalar");
 }
@@ -80,6 +84,7 @@ export async function togglePublish(id: string, next: boolean) {
 export async function deleteCampaign(id: string): Promise<CampaignResult> {
   if (!(await guard())) return { error: "Yetkiniz yok." };
   await db.promoCampaign.delete({ where: { id } });
+  invalidateCatalog();
   revalidatePath("/admin/kampanyalar");
   revalidatePath("/kampanyalar");
   return { ok: true };

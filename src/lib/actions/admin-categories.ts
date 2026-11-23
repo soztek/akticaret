@@ -1,5 +1,6 @@
 "use server";
 
+import { invalidateCatalog } from "@/lib/cached";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
@@ -38,6 +39,7 @@ export async function createCategory(input: {
       sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
     },
   });
+  invalidateCatalog();
   revalidatePath("/admin/kategoriler");
   return { ok: true };
 }
@@ -67,6 +69,7 @@ export async function updateCategory(input: {
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     },
   });
+  invalidateCatalog();
   revalidatePath("/admin/kategoriler");
   return { ok: true };
 }
@@ -79,6 +82,7 @@ export async function deleteCategory(id: string): Promise<CatActionResult> {
   }
   // Ürünler kategorisiz kalır (categoryId null olur)
   await db.category.delete({ where: { id } });
+  invalidateCatalog();
   revalidatePath("/admin/kategoriler");
   return { ok: true };
 }
@@ -100,6 +104,7 @@ export async function duplicateCategory(id: string): Promise<CatActionResult> {
       sortOrder: src.sortOrder + 1,
     },
   });
+  invalidateCatalog();
   revalidatePath("/admin/kategoriler");
   return { ok: true };
 }

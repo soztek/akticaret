@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { cachedCatalog } from "@/lib/cached";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -15,11 +16,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/bayi/basvuru`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 
-  const [cats, prods, camps] = await Promise.all([
+  const [cats, prods, camps] = await cachedCatalog(["sitemap"], () => Promise.all([
     db.category.findMany({ where: { isActive: true }, select: { slug: true } }),
     db.product.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
     db.promoCampaign.findMany({ where: { isPublished: true }, select: { slug: true, updatedAt: true } }),
-  ]);
+  ]));
 
   const catEntries: MetadataRoute.Sitemap = cats.map((c) => ({
     url: `${BASE}/kategori/${c.slug}`,
@@ -30,14 +31,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const productEntries: MetadataRoute.Sitemap = prods.map((p) => ({
     url: `${BASE}/urun/${p.slug}`,
-    lastModified: p.updatedAt,
+    lastModified: new Date(p.updatedAt),
     changeFrequency: "weekly",
     priority: 0.6,
   }));
 
   const campEntries: MetadataRoute.Sitemap = camps.map((c) => ({
     url: `${BASE}/kampanyalar/${c.slug}`,
-    lastModified: c.updatedAt,
+    lastModified: new Date(c.updatedAt),
     changeFrequency: "weekly",
     priority: 0.5,
   }));

@@ -20,6 +20,9 @@ export default function robots(): MetadataRoute.Robots {
           "/arama",
         ],
       },
+      // Meta AI eğitim tarayıcısı: müşteri getirmiyor, binlerce sayfayı gezip Neon DB compute faturasını şişiriyor.
+      // (Link önizlemesi yapan facebookexternalhit ETKİLENMEZ.)
+      { userAgent: "meta-externalagent", disallow: "/" },
     ],
     sitemap: `${BASE}/sitemap.xml`,
     host: BASE,

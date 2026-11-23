@@ -1,5 +1,6 @@
 "use server";
 
+import { invalidateCatalog } from "@/lib/cached";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
@@ -83,6 +84,7 @@ export async function updateProductAction(
     },
   });
 
+  invalidateCatalog();
   revalidatePath("/admin/urunler");
   revalidatePath(`/urun/${product.slug}`);
   return { ok: true };
@@ -154,6 +156,7 @@ export async function createProductAction(
     },
   });
 
+  invalidateCatalog();
   revalidatePath("/admin/urunler");
   redirect(`/admin/urunler/${product.id}`);
 }
@@ -163,5 +166,6 @@ export async function toggleProductActive(id: string, next: boolean) {
   const user = await requirePermission(PERMISSIONS.PRODUCTS_WRITE).catch(() => null);
   if (!user) return;
   await db.product.update({ where: { id }, data: { isActive: next } });
+  invalidateCatalog();
   revalidatePath("/admin/urunler");
 }

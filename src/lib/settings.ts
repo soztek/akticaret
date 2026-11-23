@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
+import { cachedCatalog } from "@/lib/cached";
 
 /** SiteSetting.data içindeki serbest alanlar. */
 export type SettingsData = {
@@ -39,7 +40,7 @@ const DEFAULTS: Settings = {
 
 /** Tekil site ayarını getirir (request başına cache'li). Kayıt yoksa varsayılan döner. */
 export const getSettings = cache(async (): Promise<Settings> => {
-  const row = await db.siteSetting.findUnique({ where: { id: "main" } });
+  const row = await cachedCatalog(["site-settings"], () => db.siteSetting.findUnique({ where: { id: "main" } }));
   if (!row) return DEFAULTS;
   return {
     companyName: row.companyName,

@@ -1,5 +1,6 @@
 "use server";
 
+import { invalidateCatalog } from "@/lib/cached";
 import { revalidatePath } from "next/cache";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/rbac";
@@ -31,6 +32,7 @@ export async function importProducts(
   });
 
   if (!dryRun && report.ok && ((report.created ?? 0) > 0 || (report.updated ?? 0) > 0)) {
+    invalidateCatalog();
     revalidatePath("/admin/urunler");
     revalidatePath("/admin/stok");
   }

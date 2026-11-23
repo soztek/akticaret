@@ -6,6 +6,7 @@ import { PromoBanners } from "@/components/shop/promo-banners";
 import { db } from "@/lib/db";
 import { getFeaturedProducts, getDiscountedProducts, getBrands } from "@/lib/catalog";
 import { getPriceView } from "@/lib/pricing-server";
+import { cachedCatalog } from "@/lib/cached";
 
 export const dynamic = "force-dynamic";
 
@@ -28,13 +29,15 @@ export default async function HomePage() {
     getFeaturedProducts(10),
     getDiscountedProducts(10),
     getBrands(),
-    db.banner.findFirst({
-      where: { position: "HERO", isActive: true },
-      orderBy: { sortOrder: "asc" },
-      select: { imageUrl: true },
-    }),
+    cachedCatalog(["home-hero"], () =>
+      db.banner.findFirst({
+        where: { position: "HERO", isActive: true },
+        orderBy: { sortOrder: "asc" },
+        select: { imageUrl: true },
+      })
+    ),
     getPriceView(),
-    db.promoCampaign.findMany({
+    cachedCatalog(["home-campaigns"], () => db.promoCampaign.findMany({
       where: {
         isPublished: true,
         AND: [
@@ -45,7 +48,7 @@ export default async function HomePage() {
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       take: 24,
       include: { product: { select: { slug: true } } },
-    }),
+    })),
   ]);
 
   return (

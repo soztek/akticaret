@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { normalizeSearch } from "@/lib/search-normalize";
+import { cachedFn } from "@/lib/cached";
 
 // ============================================================
 // Katalog veri erişimi + serileştirme (Decimal -> number).
@@ -79,7 +80,7 @@ export type NavCategory = {
   children: { id: string; name: string; slug: string }[];
 };
 
-export async function getNavCategories(): Promise<NavCategory[]> {
+async function getNavCategoriesUncached(): Promise<NavCategory[]> {
   const cats = await db.category.findMany({
     where: { parentId: null, isActive: true },
     orderBy: { sortOrder: "asc" },
@@ -101,7 +102,7 @@ export async function getNavCategories(): Promise<NavCategory[]> {
 
 // ---------- Ana sayfa ----------
 
-export async function getFeaturedProducts(limit = 8): Promise<ProductCardData[]> {
+async function getFeaturedProductsUncached(limit = 8): Promise<ProductCardData[]> {
   const rows = await db.product.findMany({
     where: { isActive: true, isFeatured: true },
     take: limit,
@@ -112,7 +113,7 @@ export async function getFeaturedProducts(limit = 8): Promise<ProductCardData[]>
 }
 
 /** Liste fiyatı satış fiyatından yüksek olanlar (indirimli). */
-export async function getDiscountedProducts(limit = 8): Promise<ProductCardData[]> {
+async function getDiscountedProductsUncached(limit = 8): Promise<ProductCardData[]> {
   const rows = await db.product.findMany({
     where: { isActive: true, listPrice: { gt: db.product.fields.b2cPrice } },
     take: limit,
@@ -122,7 +123,7 @@ export async function getDiscountedProducts(limit = 8): Promise<ProductCardData[
   return rows.map(toCard);
 }
 
-export async function getBrands(): Promise<{ id: string; name: string; slug: string }[]> {
+async function getBrandsUncached(): Promise<{ id: string; name: string; slug: string }[]> {
   return db.brand.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
@@ -135,7 +136,7 @@ export async function getBrands(): Promise<{ id: string; name: string; slug: str
 export type SortKey = "new" | "price-asc" | "price-desc" | "popular";
 
 /** Bir kategorinin TÜM alt-soy id'leri (recursive) — ürün listelemede kullanılır. */
-export async function getDescendantIds(categoryId: string): Promise<string[]> {
+async function getDescendantIdsUncached(categoryId: string): Promise<string[]> {
   const all = await db.category.findMany({ select: { id: true, parentId: true } });
   const childrenMap = new Map<string, string[]>();
   for (const c of all) {
@@ -156,7 +157,7 @@ export async function getDescendantIds(categoryId: string): Promise<string[]> {
   return out;
 }
 
-export async function getCategoryBySlug(slug: string) {
+async function getCategoryBySlugUncached(slug: string) {
   return db.category.findUnique({
     where: { slug },
     include: {
@@ -170,7 +171,7 @@ export async function getCategoryBySlug(slug: string) {
   });
 }
 
-export async function getCategoryProducts(opts: {
+async function getCategoryProductsUncached(opts: {
   categoryId: string;
   childIds?: string[];
   brandSlugs?: string[];
@@ -206,7 +207,7 @@ export async function getCategoryProducts(opts: {
 }
 
 /** Tüm aktif ürünler — sayfalamalı (Tüm Ürünler sayfası). */
-export async function getAllProducts(opts: {
+async function getAllProductsUncached(opts: {
   page?: number;
   pageSize?: number;
   sort?: SortKey;
@@ -245,7 +246,7 @@ export async function getAllProducts(opts: {
 }
 
 /** Bir kategorideki (alt kategoriler dahil) markalar — filtre için. */
-export async function getCategoryBrands(categoryIds: string[]) {
+async function getCategoryBrandsUncached(categoryIds: string[]) {
   const rows = await db.product.findMany({
     where: { isActive: true, categoryId: { in: categoryIds }, brandId: { not: null } },
     distinct: ["brandId"],
@@ -259,7 +260,7 @@ export async function getCategoryBrands(categoryIds: string[]) {
 
 // ---------- Ürün detay ----------
 
-export async function getProductBySlug(slug: string) {
+async function getProductBySlugUncached(slug: string) {
   const p = await db.product.findUnique({
     where: { slug },
     include: {
@@ -318,7 +319,7 @@ export async function getProductBySlug(slug: string) {
   };
 }
 
-export async function getRelatedProducts(
+async function getRelatedProductsUncached(
   categoryId: string | null,
   excludeId: string,
   limit = 4,
@@ -349,3 +350,17 @@ export async function searchProducts(q: string, limit = 20): Promise<ProductCard
   });
   return rows.map(toCard);
 }
+
+// ---------- Önbellekli dışa açık API ----------
+// Bkz. src/lib/cached.ts — arama (searchProducts) bilerek önbelleksiz.
+export const getNavCategories = cachedFn("getNavCategories", getNavCategoriesUncached);
+export const getFeaturedProducts = cachedFn("getFeaturedProducts", getFeaturedProductsUncached);
+export const getDiscountedProducts = cachedFn("getDiscountedProducts", getDiscountedProductsUncached);
+export const getBrands = cachedFn("getBrands", getBrandsUncached);
+export const getDescendantIds = cachedFn("getDescendantIds", getDescendantIdsUncached);
+export const getCategoryBySlug = cachedFn("getCategoryBySlug", getCategoryBySlugUncached);
+export const getCategoryProducts = cachedFn("getCategoryProducts", getCategoryProductsUncached);
+export const getAllProducts = cachedFn("getAllProducts", getAllProductsUncached);
+export const getCategoryBrands = cachedFn("getCategoryBrands", getCategoryBrandsUncached);
+export const getProductBySlug = cachedFn("getProductBySlug", getProductBySlugUncached);
+export const getRelatedProducts = cachedFn("getRelatedProducts", getRelatedProductsUncached);

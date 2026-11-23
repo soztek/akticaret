@@ -3,6 +3,7 @@
 import { randomBytes } from "crypto";
 import { Prisma, type PaymentMethod } from "@prisma/client";
 import { db } from "@/lib/db";
+import { invalidateCatalog } from "@/lib/cached";
 import { getCurrentUser } from "@/lib/auth";
 import { getPriceView } from "@/lib/pricing-server";
 import { resolvePrice } from "@/lib/pricing";
@@ -156,5 +157,7 @@ export async function createOrderAction(input: CreateOrderInput): Promise<Create
     return { ok: false, error: "Sipariş oluşturulurken bir hata oluştu. Lütfen tekrar deneyin." };
   }
 
+  // Stok düştü: vitrindeki stok bilgisini tazele
+  invalidateCatalog();
   return { ok: true, orderNumber };
 }

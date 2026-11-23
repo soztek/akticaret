@@ -1,5 +1,6 @@
 "use server";
 
+import { invalidateCatalog } from "@/lib/cached";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -71,6 +72,7 @@ export async function saveSettings(_prev: SettingsState, fd: FormData): Promise<
   });
 
   // Ayarları kullanan tüm sayfaları tazele
+  invalidateCatalog();
   revalidatePath("/", "layout");
   return { ok: true };
 }

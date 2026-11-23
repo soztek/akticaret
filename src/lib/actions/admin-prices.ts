@@ -1,5 +1,6 @@
 "use server";
 
+import { invalidateCatalog } from "@/lib/cached";
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -176,6 +177,7 @@ export async function bulkUpdatePrices(input: BulkPriceInput): Promise<BulkPrice
         } as Prisma.InputJsonValue,
       },
     });
+    invalidateCatalog();
     revalidatePath("/admin/urunler");
   }
 
@@ -264,6 +266,7 @@ export async function updateProductPrices(
     },
   });
 
+  invalidateCatalog();
   revalidatePath("/admin/urunler");
   return { ok: true };
 }
